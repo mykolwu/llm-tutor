@@ -251,6 +251,7 @@ const Chat = ({
   return (
     <div className={styles.chatContainer}>
       <div className={styles.messages}>
+      <Message role="assistant" text="Beep boop. I am an experimental AI Tutor for CS 61A. My replies might not always be accurate, so always think critically and let me know if you think that I've erred. Conversations are logged. Beep bop." />
         {messages.map((msg, index) => (
           <Message key={index} role={msg.role} text={msg.text} />
         ))}
