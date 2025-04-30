@@ -1,0 +1,138 @@
+[
+  {
+    "type": "h2",
+    "content": "3.5   Interpreters for Languages with Abstraction"
+  },
+  {
+    "type": "p",
+    "content": "The Calculator language provides a means of combination through nested call\nexpressions. However, there is no way to define new operators, give names to\nvalues, or express general methods of computation. Calculator does not support\nabstraction in any way. As a result, it is not a particularly powerful or\ngeneral programming language. We now turn to the task of defining a general\nprogramming language that supports abstraction by binding names to values and\ndefining new operations."
+  },
+  {
+    "type": "p",
+    "content": "Unlike the previous section, which presented a complete interpreter as Python\nsource code, this section takes a descriptive approach. The companion project\nasks you to implement the ideas presented here by building a fully functional\nScheme interpreter."
+  },
+  {
+    "type": "h3",
+    "content": "3.5.1   Structure"
+  },
+  {
+    "type": "p",
+    "content": "This section describes the general structure of a Scheme interpreter. Completing\nthat project will produce a working implementation of the interpreter described\nhere."
+  },
+  {
+    "type": "p",
+    "content": "An interpreter for Scheme can share much of the same structure as the\nCalculator interpreter.  A parser produces an expression that is interpreted by\nan evaluator. The evaluation function inspects the form of an expression, and\nfor call expressions it calls a function to apply a procedure to some\narguments. Much of the difference in evaluators is associated with special\nforms, user-defined functions, and implementing the environment model of\ncomputation."
+  },
+  {
+    "type": "p",
+    "content": "Parsing.Thescheme_readerandscheme_tokensmodules from the Calculator\ninterpreter are nearly sufficient to parse any valid Scheme expression.\nHowever, it does not yet support quotation or dotted lists.  A full Scheme\ninterpreter should be able to parse the following input expression."
+  },
+  {
+    "type": "code",
+    "content": ">>> read_line(\"(car '(1 . 2))\")\nPair('car', Pair(Pair('quote', Pair(Pair(1, 2), nil)), nil))\n"
+  },
+  {
+    "type": "p",
+    "content": "Your first task in implementing the Scheme interpreter will be to extendscheme_readerto correctly parse dotted lists and quotation."
+  },
+  {
+    "type": "p",
+    "content": "Evaluation.Scheme is evaluated one expression at a time. A skeleton\nimplementation of the evaluator is defined inscheme.pyof the companion\nproject. Each expression returned fromscheme_readis passed to thescheme_evalfunction, which evaluates an expressionexprin the current\nenvironmentenv."
+  },
+  {
+    "type": "p",
+    "content": "Thescheme_evalfunction evaluates the different forms of expressions in\nScheme: primitives, special forms, and call expressions.  The form of a\ncombination in Scheme can be determined by inspecting its first element.  Each\nspecial form has its own evaluation rule.  A simplified implementation ofscheme_evalappears below. Some error checking and special form handling\nhas been removed in order to focus our discussion. A complete implementation\nappears in the companion project."
+  },
+  {
+    "type": "code",
+    "content": ">>> def scheme_eval(expr, env):\n        \"\"\"Evaluate Scheme expression expr in environment env.\"\"\"\n        if scheme_symbolp(expr):\n            return env[expr]\n        elif scheme_atomp(expr):\n            return expr\n        first, rest = expr.first, expr.second\n        if first == \"lambda\":\n            return do_lambda_form(rest, env)\n        elif first == \"define\":\n            do_define_form(rest, env)\n            return None\n        else:\n            procedure = scheme_eval(first, env)\n            args = rest.map(lambda operand: scheme_eval(operand, env))\n            return scheme_apply(procedure, args, env)\n"
+  },
+  {
+    "type": "p",
+    "content": "Procedure application.The final case above invokes a second process,\nprocedure application, that is implemented by the functionscheme_apply.\nThe procedure application process in Scheme is considerably more general than\nthecalc_applyfunction in Calculator. It applies two kinds of arguments:\naPrimtiveProcedureor aLambdaProcedure. APrimitiveProcedureis\nimplemented in Python; it has an instance attributefnthat is bound to a\nPython function. In addition, it may or may not require access to the current\nenvironment. This Python function is called whenever the procedure is applied."
+  },
+  {
+    "type": "p",
+    "content": "ALambdaProcedureis implemented in Scheme.  It has abodyattribute\nthat is a Scheme expression, evaluated whenever the procedure is applied.\nTo apply the procedure to a list of arguments, the body expression is evaluated\nin a new environment.  To construct this environment, a new frame is added to\nthe environment, in which the formal parameters of the procedure are bound to\nthe arguments. The body is evaluated usingscheme_eval."
+  },
+  {
+    "type": "p",
+    "content": "Eval/apply recursion.The functions that implement the evaluation process,scheme_evalandscheme_apply, are mutually recursive. Evaluation\nrequires application whenever a call expression is encountered.  Application\nuses evaluation to evaluate operand expressions into arguments, as well as to\nevaluate the body of user-defined procedures. The general structure of this\nmutually recursive process appears in interpreters quite generally: evaluation\nis defined in terms of application and application is defined in terms of\nevaluation."
+  },
+  {
+    "type": "p",
+    "content": "This recursive cycle ends with language primitives. Evaluation has a base case\nthat is evaluating a primitive expression. Some special forms also constitute\nbase cases without recursive calls. Function application has a base case that\nis applying a primitive procedure. This mutually recursive structure, between\nan eval function that processes expression forms and an apply function that\nprocesses functions and their arguments, constitutes the essence of the\nevaluation process."
+  },
+  {
+    "type": "h3",
+    "content": "3.5.2   Environments"
+  },
+  {
+    "type": "p",
+    "content": "Now that we have described the structure of our Scheme interpreter, we turn to\nimplementing theFrameclass that forms environments. EachFrameinstance\nrepresents an environment in which symbols are bound to values. A frame has a\ndictionary ofbindings, as well as aparentframe that isNonefor\nthe global frame."
+  },
+  {
+    "type": "p",
+    "content": "Bindings are not accessed directly, but instead through twoFramemethods:lookupanddefine. The first implements the look-up procedure\nof the environment model of computation described in Chapter 1. A symbol is\nmatched against thebindingsof the current frame.  If it is found, the\nvalue to which it is bound is returned. If it is not found, look-up proceeds to\ntheparentframe.  On the other hand, thedefinemethod always binds a\nsymbol to a value in the current frame."
+  },
+  {
+    "type": "p",
+    "content": "The implementation oflookupand the use ofdefineare left as\nexercises.  As an illustration of their use, consider the following example\nScheme program:"
+  },
+  {
+    "type": "p",
+    "content": "The first input expression is adefinespecial form, evaluated by thedo_define_formPython function.  Defining a function has several steps:"
+  },
+  {
+    "type": "p",
+    "content": "The second input is a call expression. Theprocedurepassed toscheme_applyis theLambdaProcedurejust created and bound to the symbolfactorial.\nTheargspassed is a one-element Scheme list(5). To apply the\nprocedure, a new frame is created that extends the global frame (the parent\nenvironment of thefactorialprocedure).  In this frame, the symbolnis bound to the value 5. Then, the body offactorialis evaluated in\nthat environment, and its value is returned."
+  },
+  {
+    "type": "h3",
+    "content": "3.5.3   Data as Programs"
+  },
+  {
+    "type": "p",
+    "content": "In thinking about a program that evaluates Scheme expressions, an analogy\nmight be helpful. One operational view of the meaning of a program is that a\nprogram is a description of an abstract machine. For example, consider again\nthis procedure to compute factorials:"
+  },
+  {
+    "type": "p",
+    "content": "We could express an equivalent program in Python as well, using a conditional\nexpression."
+  },
+  {
+    "type": "code",
+    "content": ">>> def factorial(n):\n        return 1 if n == 1 else n * factorial(n - 1)\n"
+  },
+  {
+    "type": "p",
+    "content": "We may regard this program as the description of a machine containing parts\nthat decrement, multiply, and test for equality, together with a two-position\nswitch and another factorial machine. (The factorial machine is infinite\nbecause it contains another factorial machine within it.) The figure below is a\nflow diagram for the factorial machine, showing how the parts are wired\ntogether."
+  },
+  {
+    "type": "p",
+    "content": "In a similar way, we can regard the Scheme interpreter as a very special machine\nthat takes as input a description of a machine. Given this input, the\ninterpreter configures itself to emulate the machine described. For example, if\nwe feed our evaluator the definition of factorial the evaluator will be able to\ncompute factorials."
+  },
+  {
+    "type": "p",
+    "content": "From this perspective, our Scheme interpreter is seen to be a universal machine.\nIt mimics other machines when these are described as Scheme programs.\nIt acts as a bridge between the data objects that are manipulated by our\nprogramming language and the programming language itself. Image that a user\ntypes a Scheme expression into our running Scheme interpreter. From the perspective\nof the user, an input expression such as(+ 2 2)is an expression in the\nprogramming language, which the interpreter should evaluate. From the\nperspective of the Scheme interpreter, however, the expression is simply a\nsentence of words that is to be manipulated according to a well-defined set of\nrules."
+  },
+  {
+    "type": "p",
+    "content": "That the user's programs are the interpreter's data need not be a source of\nconfusion. In fact, it is sometimes convenient to ignore this distinction, and\nto give the user the ability to explicitly evaluate a data object as an\nexpression. In Scheme, we use this facility whenever employing therunprocedure.  Similar functions exist in Python: theevalfunction will\nevaluate a Python expression and theexecfunction will execute a Python\nstatement. Thus,"
+  },
+  {
+    "type": "code",
+    "content": ">>> eval('2+2')\n4\n"
+  },
+  {
+    "type": "p",
+    "content": "and"
+  },
+  {
+    "type": "code",
+    "content": ">>> 2+2\n4\n"
+  },
+  {
+    "type": "p",
+    "content": "both return the same result. Evaluating expressions that are constructed as a\npart of execution is a common and powerful feature in dynamic programming\nlanguages. In few languages is this practice as common as in Scheme, but the\nability to construct and evaluate expressions during the course of execution of\na program can prove to be a valuable tool for any programmer."
+  }
+]

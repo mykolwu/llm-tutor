@@ -1,0 +1,602 @@
+[
+  {
+    "type": "h2",
+    "content": "1.6   Higher-Order Functions"
+  },
+  {
+    "type": "p",
+    "content": "We have seen that functions are a method of abstraction that describe compound\noperations independent of the particular values of their arguments. That is, insquare,"
+  },
+  {
+    "type": "code",
+    "content": ">>> def square(x):\n        return x * x\n"
+  },
+  {
+    "type": "p",
+    "content": "we are not talking about the square of a particular number, but rather about a\nmethod for obtaining the square of any number. Of course, we could get along\nwithout ever defining this function, by always writing expressions such as"
+  },
+  {
+    "type": "code",
+    "content": ">>> 3 * 3\n9\n>>> 5 * 5\n25\n"
+  },
+  {
+    "type": "p",
+    "content": "and never mentioningsquareexplicitly. This practice would suffice for\nsimple computations such assquare, but would become arduous for more\ncomplex examples such asabsorfib. In general, lacking function\ndefinition would put us at the disadvantage of forcing us to work always at the\nlevel of the particular operations that happen to be primitives in the language\n(multiplication, in this case) rather than in terms of higher-level operations.\nOur programs would be able to compute squares, but our language would lack the\nability to express the concept of squaring."
+  },
+  {
+    "type": "p",
+    "content": "One of the things we should demand from a powerful programming language is the\nability to build abstractions by assigning names to common patterns and then to\nwork in terms of the names directly.  Functions provide this ability.  As we\nwill see in the following examples, there are common programming patterns that\nrecur in code, but are used with a number of different functions. These\npatterns can also be abstracted, by giving them names."
+  },
+  {
+    "type": "p",
+    "content": "To express certain general patterns as named concepts, we will need to construct\nfunctions that can accept other functions as arguments or return functions as\nvalues. Functions that manipulate functions are called higher-order functions.\nThis section shows how higher-order functions can serve as powerful abstraction\nmechanisms, vastly increasing the expressive power of our language."
+  },
+  {
+    "type": "h3",
+    "content": "1.6.1   Functions as Arguments"
+  },
+  {
+    "type": "p",
+    "content": "Consider the following three functions, which all compute summations. The first,sum_naturals, computes the sum of natural numbers up ton:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def sum_naturals(n):\n        total, k = 0, 1\n        while k <= n:\n            total, k = total + k, k + 1\n        return total\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> sum_naturals(100)\n5050\n"
+  },
+  {
+    "type": "p",
+    "content": "The second,sum_cubes, computes the sum of the cubes of natural numbers up\nton."
+  },
+  {
+    "type": "code",
+    "content": ">>> def sum_cubes(n):\n        total, k = 0, 1\n        while k <= n:\n            total, k = total + k*k*k, k + 1\n        return total\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> sum_cubes(100)\n25502500\n"
+  },
+  {
+    "type": "p",
+    "content": "The third,pi_sum, computes the sum of terms in the series"
+  },
+  {
+    "type": "p",
+    "content": "which converges to pi very slowly."
+  },
+  {
+    "type": "code",
+    "content": ">>> def pi_sum(n):\n        total, k = 0, 1\n        while k <= n:\n            total, k = total + 8 / ((4*k-3) * (4*k-1)), k + 1\n        return total\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> pi_sum(100)\n3.1365926848388144\n"
+  },
+  {
+    "type": "p",
+    "content": "These three functions clearly share a common underlying pattern. They are for\nthe most part identical, differing only in name and the function ofkused\nto compute the term to be added. We could generate each of the functions by\nfilling in slots in the same template:"
+  },
+  {
+    "type": "p",
+    "content": "The presence of such a common pattern is strong evidence that there is a useful\nabstraction waiting to be brought to the surface. Each of these functions is a\nsummation of terms. As program designers, we would like our language to be\npowerful enough so that we can write a function that expresses the concept of\nsummation itself rather than only functions that compute particular sums. We\ncan do so readily in Python by taking the common template shown above and\ntransforming the \"slots\" into formal parameters:"
+  },
+  {
+    "type": "p",
+    "content": "In the example below,summationtakes as its two arguments the upper boundntogether with the functiontermthat computes the kth term. We can usesummationjust as we would any function, and it expresses summations\nsuccinctly.  Take the time to step through this example, and notice how bindingcubeto the local namestermensures that the result1*1*1 + 2*2*2 +\n3*3*3 = 36is computed correctly. In this example, frames which are no longer\nneeded are removed to save space."
+  },
+  {
+    "type": "p",
+    "content": "Using anidentityfunction that returns its argument, we can also sum\nnatural numbers using exactly the samesummationfunction."
+  },
+  {
+    "type": "code",
+    "content": ">>> def summation(n, term):\n        total, k = 0, 1\n        while k <= n:\n            total, k = total + term(k), k + 1\n        return total\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def identity(x):\n        return x\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def sum_naturals(n):\n        return summation(n, identity)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> sum_naturals(10)\n55\n"
+  },
+  {
+    "type": "p",
+    "content": "Thesummationfunction can also be called directly, without definining\nanother function for a specific sequence."
+  },
+  {
+    "type": "code",
+    "content": ">>> summation(10, square)\n385\n"
+  },
+  {
+    "type": "p",
+    "content": "We can definepi_sumusing oursummationabstraction by defining a\nfunctionpi_termto compute each term.  We pass the argument1e6, a\nshorthand for1 * 10^6 = 1000000, to generate a close approximation to pi."
+  },
+  {
+    "type": "code",
+    "content": ">>> def pi_term(x):\n        return 8 / ((4*x-3) * (4*x-1))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def pi_sum(n):\n        return summation(n, pi_term)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> pi_sum(1e6)\n3.141592153589902\n"
+  },
+  {
+    "type": "h3",
+    "content": "1.6.2   Functions as General Methods"
+  },
+  {
+    "type": "p",
+    "content": "We introduced user-defined functions as a mechanism for abstracting patterns of\nnumerical operations so as to make them independent of the particular numbers\ninvolved. With higher-order functions, we begin to see a more powerful kind of\nabstraction: some functions express general methods of computation, independent\nof the particular functions they call."
+  },
+  {
+    "type": "p",
+    "content": "Despite this conceptual extension of what a function means, our environment\nmodel of how to evaluate a call expression extends gracefully to the case of\nhigher-order functions, without change. When a user-defined function is applied\nto some arguments, the formal parameters are bound to the values of those\narguments (which may be functions) in a new local frame."
+  },
+  {
+    "type": "p",
+    "content": "Consider the following example, which implements a general method for iterative\nimprovement and uses it to compute thegolden ratio. The golden ratio, often\ncalled \"phi\", is a number near 1.6 that appears frequently in nature, art, and\narchitecture."
+  },
+  {
+    "type": "p",
+    "content": "An iterative improvement algorithm begins with aguessof a solution to an\nequation. It repeatedly applies anupdatefunction to improve that guess,\nand applies aclosecomparison to check whether the currentguessis\n\"close enough\" to be considered correct."
+  },
+  {
+    "type": "code",
+    "content": ">>> def improve(update, close, guess=1):\n        while not close(guess):\n            guess = update(guess)\n        return guess\n"
+  },
+  {
+    "type": "p",
+    "content": "Thisimprovefunction is a general expression of repetitive refinement.  It\ndoesn't specify what problem is being solved: those details are left to theupdateandclosefunctions passed in as arguments."
+  },
+  {
+    "type": "p",
+    "content": "Among the well-known properties of the golden ratio are that it can be computed\nby repeatedly summing the inverse of any positive number with 1, and that it is\none less than its square. We can express these properties as functions to be\nused withimprove."
+  },
+  {
+    "type": "code",
+    "content": ">>> def golden_update(guess):\n        return 1/guess + 1\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def square_close_to_successor(guess):\n        return approx_eq(guess * guess, guess + 1)\n"
+  },
+  {
+    "type": "p",
+    "content": "Above, we introduce a call toapprox_eqthat is meant to returnTrueif\nits arguments are approximately equal to each other. To implement,approx_eq, we can compare the absolute value of the difference between\ntwo numbers to a small tolerance value."
+  },
+  {
+    "type": "code",
+    "content": ">>> def approx_eq(x, y, tolerance=1e-15):\n        return abs(x - y) < tolerance\n"
+  },
+  {
+    "type": "p",
+    "content": "Callingimprovewith the argumentsgolden_updateandsquare_close_to_successorwill compute a finite approximation to the golden\nratio."
+  },
+  {
+    "type": "code",
+    "content": ">>> improve(golden_update, square_close_to_successor)\n1.6180339887498951\n"
+  },
+  {
+    "type": "p",
+    "content": "By tracing through the steps of evaluation, we can see how this result is\ncomputed. First, a local frame forimproveis constructed with bindings forupdate,close, andguess. In the body ofimprove, the namecloseis bound tosquare_close_to_successor, which is called on the\ninitial value ofguess.  Trace through the rest of the steps to see the\ncomputational process that evolves to compute the golden ratio."
+  },
+  {
+    "type": "p",
+    "content": "This example illustrates two related big ideas in computer science. First,\nnaming and functions allow us to abstract away a vast amount of complexity.\nWhile each function definition has been trivial, the computational process set\nin motion by our evaluation procedure is quite intricate. Second, it is only by\nvirtue of the fact that we have an extremely general evaluation procedure for\nthe Python language that small components can be composed into complex\nprocesses. Understanding the procedure of interpreting programs allows us to\nvalidate and inspect the process we have created."
+  },
+  {
+    "type": "p",
+    "content": "As always, our new general methodimproveneeds a test to check its\ncorrectness. The golden ratio can provide such a test, because it also has an\nexact closed-form solution, which we can compare to this iterative result."
+  },
+  {
+    "type": "code",
+    "content": ">>> from math import sqrt\n>>> phi = 1/2 + sqrt(5)/2\n>>> def improve_test():\n        approx_phi = improve(golden_update, square_close_to_successor)\n        assert approx_eq(phi, approx_phi), 'phi differs from its approximation'\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> improve_test()\n"
+  },
+  {
+    "type": "p",
+    "content": "For this test, no news is good news:improve_testreturnsNoneafter itsassertstatement is executed successfully."
+  },
+  {
+    "type": "h3",
+    "content": "1.6.3   Defining Functions III: Nested Definitions"
+  },
+  {
+    "type": "p",
+    "content": "The above examples demonstrate how the ability to pass functions as arguments\nsignificantly enhances the expressive power of our programming language. Each\ngeneral concept or equation maps onto its own short function. One negative\nconsequence of this approach is that the global frame becomes cluttered with\nnames of small functions, which must all be unique. Another problem is that we\nare constrained by particular function signatures: theupdateargument toimprovemust take exactly one argument. Nested function definitions address\nboth of these problems, but require us to enrich our environment model."
+  },
+  {
+    "type": "p",
+    "content": "Let's consider a new problem: computing the square root of a number. In\nprogramming languages, \"square root\" is often abbreviated assqrt. Repeated\napplication of the following update converges to the square root ofa:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def average(x, y):\n        return (x + y)/2\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def sqrt_update(x, a):\n        return average(x, a/x)\n"
+  },
+  {
+    "type": "p",
+    "content": "This two-argument update function is incompatible withimprove(it takes\ntwo arguments, not one), and it provides only a single update, while we really\ncare about taking square roots by repeated updates. The solution to both of\nthese issues is to place function definitions inside the body of other\ndefinitions."
+  },
+  {
+    "type": "code",
+    "content": ">>> def sqrt(a):\n        def sqrt_update(x):\n            return average(x, a/x)\n        def sqrt_close(x):\n            return approx_eq(x * x, a)\n        return improve(sqrt_update, sqrt_close)\n"
+  },
+  {
+    "type": "p",
+    "content": "Like local assignment, localdefstatements only affect the current local\nframe. These functions are only in scope whilesqrtis being evaluated.\nConsistent with our evaluation procedure, these localdefstatements don't\neven get evaluated untilsqrtis called."
+  },
+  {
+    "type": "p",
+    "content": "Lexical scope.Locally defined functions also have access to the name\nbindings in the scope in which they are defined. In this example,sqrt_updaterefers to the namea, which is a formal parameter of its\nenclosing functionsqrt. This discipline of sharing names among nested\ndefinitions is calledlexical scoping. Critically, the inner functions have\naccess to the names in the environment where they are defined (not where they\nare called)."
+  },
+  {
+    "type": "p",
+    "content": "We require two extensions to our environment model to enable lexical scoping."
+  },
+  {
+    "type": "p",
+    "content": "Previous tosqrt, all functions were defined in the global environment,\nand so they all had the same parent: the global environment.  By contrast, when\nPython evaluates the first two clauses ofsqrt, it create functions that\nare associated with a local environment. In the call"
+  },
+  {
+    "type": "code",
+    "content": ">>> sqrt(256)\n16.0\n"
+  },
+  {
+    "type": "p",
+    "content": "the environment first adds a local frame forsqrtand evaluates thedefstatements forsqrt_updateandsqrt_close."
+  },
+  {
+    "type": "p",
+    "content": "Function values each have a new annotation that we will include in environment\ndiagrams from now on, aparent.  The parent of a function value is the first\nframe of the environment in which that function was defined.  Functions without\nparent annotations were defined in the global environment.  When a user-defined\nfunction is called, the frame created has the same parent as that function."
+  },
+  {
+    "type": "p",
+    "content": "Subsequently, the namesqrt_updateresolves to this newly defined function,\nwhich is passed as an argument toimprove. Within the body ofimprove, we must apply ourupdatefunction (bound tosqrt_update)\nto the initial guessxof 1. This final application creates an environment\nforsqrt_updatethat begins with a local frame containing onlyx,\nbut with the parent framesqrtstill containing a binding fora."
+  },
+  {
+    "type": "p",
+    "content": "The most critical part of this evaluation procedure is the transfer of the\nparent forsqrt_updateto the frame created by callingsqrt_update.\nThis frame is also annotated with[parent=f1]."
+  },
+  {
+    "type": "p",
+    "content": "Extended Environments. An environment can consist of an arbitrarily long\nchain of frames, which always concludes with the global frame. Previous to thissqrtexample, environments had at most two frames: a local frame and the\nglobal frame.  By calling functions that were defined within other functions,\nvia nesteddefstatements, we can create longer chains.  The environment\nfor this call tosqrt_updateconsists of three frames: the localsqrt_updateframe, thesqrtframe in whichsqrt_updatewas defined\n(labeledf1), and the global frame."
+  },
+  {
+    "type": "p",
+    "content": "The return expression in the body ofsqrt_updatecan resolve a value foraby following this chain of frames. Looking up a name finds the\nfirst value bound to that name in the current environment. Python checks first\nin thesqrt_updateframe -- noaexists.  Python checks next in the\nparent frame,f1, and finds a binding forato 256."
+  },
+  {
+    "type": "p",
+    "content": "Hence, we realize two key advantages of lexical scoping in Python."
+  },
+  {
+    "type": "p",
+    "content": "Thesqrt_updatefunction carries with it some data: the value forareferenced in the environment in which it was defined. Because they \"enclose\"\ninformation in this way, locally defined functions are often calledclosures."
+  },
+  {
+    "type": "h3",
+    "content": "1.6.4   Functions as Returned Values"
+  },
+  {
+    "type": "p",
+    "content": "We can achieve even more expressive power in our programs by creating functions\nwhose returned values are themselves functions. An important feature of\nlexically scoped programming languages is that locally defined functions\nmaintain their parent environment when they are returned.  The following\nexample illustrates the utility of this feature."
+  },
+  {
+    "type": "p",
+    "content": "Once many simple functions are defined, functioncompositionis a natural\nmethod of combination to include in our programming language. That is, given\ntwo functionsf(x)andg(x), we might want to defineh(x) =\nf(g(x)). We can define function composition using our existing tools:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def compose1(f, g):\n        def h(x):\n            return f(g(x))\n        return h\n"
+  },
+  {
+    "type": "p",
+    "content": "The environment diagram for this example shows how the namesfandgare resolved correctly, even in the presence of conflicting names."
+  },
+  {
+    "type": "p",
+    "content": "The 1 incompose1is meant to signify that the composed functions all\ntake a single argument. This naming convention is not enforced by the\ninterpreter; the 1 is just part of the function name."
+  },
+  {
+    "type": "p",
+    "content": "At this point, we begin to observe the benefits of our effort to define\nprecisely the environment model of computation. No modification to our\nenvironment model is required to explain our ability to return functions in\nthis way."
+  },
+  {
+    "type": "h3",
+    "content": "1.6.5   Example: Newton's Method"
+  },
+  {
+    "type": "p",
+    "content": "This extended example shows how function return values and local definitions can\nwork together to express general ideas concisely. We will implement an algorithm\nthat is used broadly in machine learning, scientific computing, hardware design,\nand optimization."
+  },
+  {
+    "type": "p",
+    "content": "Newton's method is a classic iterative approach to finding the arguments of a\nmathematical function that yield a return value of 0. These values are called\nthezerosof the function. Finding a zero of a function is often equivalent\nto solving some other problem of interest, such as computing a square root."
+  },
+  {
+    "type": "p",
+    "content": "A motivating comment before we proceed: it is easy to take for granted the fact\nthat we know how to compute square roots. Not just Python, but your phone, web\nbrowser, or pocket calculator can do so for you. However, part of learning\ncomputer science is understanding how quantities like these can be computed, and\nthe general approach presented here is applicable to solving a large class of\nequations beyond those built into Python."
+  },
+  {
+    "type": "p",
+    "content": "Newton's method is an iterative improvement algorithm: it improves a guess of\nthe zero for any function that isdifferentiable, which means that it can be\napproximated by a straight line at any point.  Newton's method follows these\nlinear approximations to find function zeros."
+  },
+  {
+    "type": "p",
+    "content": "Imagine a line through the point$(x, f(x))$that has the same slope\nas the curve for function$f(x)$at that point. Such a line is\ncalled thetangent, and its slope is called thederivativeof$f$at$x$."
+  },
+  {
+    "type": "p",
+    "content": "This line's slope is the ratio of the change in function value to the change in\nfunction argument. Hence, translating$x$by$f(x)$divided by the slope will give the argument value at which this tangent line\ntouches 0."
+  },
+  {
+    "type": "p",
+    "content": "Anewton_updateexpresses the computational process of following this\ntangent line to 0, for a functionfand its derivativedf."
+  },
+  {
+    "type": "code",
+    "content": ">>> def newton_update(f, df):\n        def update(x):\n            return x - f(x) / df(x)\n        return update\n"
+  },
+  {
+    "type": "p",
+    "content": "Finally, we can define thefind_rootfunction in terms ofnewton_update,\nourimprovealgorithm, and a comparison to see if$f(x)$is near\n0."
+  },
+  {
+    "type": "code",
+    "content": ">>> def find_zero(f, df):\n        def near_zero(x):\n            return approx_eq(f(x), 0)\n        return improve(newton_update(f, df), near_zero)\n"
+  },
+  {
+    "type": "p",
+    "content": "Computing Roots.Using Newton's method, we can compute roots of arbitrary\ndegree$n$. The degree$n$root of$a$is$x$such that$x \\cdot x \\cdot x \\dots x = a$with$x$repeated$n$times. For example,"
+  },
+  {
+    "type": "p",
+    "content": "We can compute roots using Newton's method with the following observations:"
+  },
+  {
+    "type": "p",
+    "content": "If we can find a zero of this last equation, then we can compute degree$n$roots. By plotting the curves for$n$equal to 2, 3,\nand 6 and$a$equal to 64, we can visualize this relationship."
+  },
+  {
+    "type": "p",
+    "content": "We first implementsquare_rootby definingfand its derivativedf.\nWe use from calculus the fact that the derivative of$f(x) = x^2 -\na$is the linear function$df(x) = 2x$."
+  },
+  {
+    "type": "code",
+    "content": ">>> def square_root_newton(a):\n        def f(x):\n            return x * x - a\n        def df(x):\n            return 2 * x\n        return find_zero(f, df)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> square_root_newton(64)\n8.0\n"
+  },
+  {
+    "type": "p",
+    "content": "Generalizing to roots of arbitrary degree$n$, we compute$f(x) = x^n - a$and its derivative$df(x) = n \\cdot\nx^{n-1}$."
+  },
+  {
+    "type": "code",
+    "content": ">>> def power(x, n):\n        \"\"\"Return x * x * x * ... * x for x repeated n times.\"\"\"\n        product, k = 1, 0\n        while k < n:\n            product, k = product * x, k + 1\n        return product\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def nth_root_of_a(n, a):\n        def f(x):\n            return power(x, n) - a\n        def df(x):\n            return n * power(x, n-1)\n        return find_zero(f, df)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> nth_root_of_a(2, 64)\n8.0\n>>> nth_root_of_a(3, 64)\n4.0\n>>> nth_root_of_a(6, 64)\n2.0\n"
+  },
+  {
+    "type": "p",
+    "content": "The approximation error in all of these computations can be reduced by changing\nthetoleranceinapprox_eqto a smaller number."
+  },
+  {
+    "type": "p",
+    "content": "As you experiment with Newton's method, be aware that it will not always\nconverge. The initial guess ofimprovemust be sufficiently close to the\nzero, and various conditions about the function must be met. Despite this\nshortcoming, Newton's method is a powerful general computational method for\nsolving differentiable equations. Very fast algorithms for logarithms and large\ninteger division employ variants of the technique in modern computers."
+  },
+  {
+    "type": "h3",
+    "content": "1.6.6   Currying"
+  },
+  {
+    "type": "p",
+    "content": "We can use higher-order functions to convert a function that takes multiple\narguments into a chain of functions that each take a single argument. More\nspecifically, given a functionf(x, y), we can define a functiongsuch\nthatg(x)(y)is equivalent tof(x, y). Here,gis a higher-order\nfunction that takes in a single argumentxand returns another function\nthat takes in a single argumenty. This transformation is calledcurrying."
+  },
+  {
+    "type": "p",
+    "content": "As an example, we can define a curried version of thepowfunction:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def curried_pow(x):\n        def h(y):\n            return pow(x, y)\n        return h\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> curried_pow(2)(3)\n8\n"
+  },
+  {
+    "type": "p",
+    "content": "Some programming languages, such as Haskell, only allow functions that take a\nsingle argument, so the programmer must curry all multi-argument procedures. In\nmore general languages such as Python, currying is useful when we require a\nfunction that takes in only a single argument. For example, themappattern\napplies a single-argument function to a sequence of values. In later chapters,\nwe will see more general examples of the map pattern, but for now, we can\nimplement the pattern in a function:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def map_to_range(start, end, f):\n        while start < end:\n            print(f(start))\n            start = start + 1\n"
+  },
+  {
+    "type": "p",
+    "content": "We can usemap_to_rangeandcurried_powto compute the first ten powers\nof two, rather than specifically writing a function to do so:"
+  },
+  {
+    "type": "code",
+    "content": ">>> map_to_range(0, 10, curried_pow(2))\n1\n2\n4\n8\n16\n32\n64\n128\n256\n512\n"
+  },
+  {
+    "type": "p",
+    "content": "We can similarly use the same two functions to compute powers of other numbers.\nCurrying allows us to do so without writing a specific function for each number\nwhose powers we wish to compute."
+  },
+  {
+    "type": "p",
+    "content": "In the above examples, we manually performed the currying transformation on thepowfunction to obtaincurried_pow. Instead, we can define functions to\nautomate currying, as well as the inverseuncurryingtransformation:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def curry2(f):\n        \"\"\"Return a curried version of the given two-argument function.\"\"\"\n        def g(x):\n            def h(y):\n                return f(x, y)\n            return h\n        return g\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def uncurry2(g):\n        \"\"\"Return a two-argument version of the given curried function.\"\"\"\n        def f(x, y):\n            return g(x)(y)\n        return f\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> pow_curried = curry2(pow)\n>>> pow_curried(2)(5)\n32\n>>> map_to_range(0, 10, pow_curried(2))\n1\n2\n4\n8\n16\n32\n64\n128\n256\n512\n"
+  },
+  {
+    "type": "p",
+    "content": "Thecurry2function takes in a two-argument functionfand returns a\nsingle-argument functiong. Whengis applied to an argumentx, it\nreturns a single-argument functionh. Whenhis applied toy, it\ncallsf(x, y). Thus,curry2(f)(x)(y)is equivalent tof(x, y). Theuncurry2function reverses the currying transformation, so thatuncurry2(curry2(f))is equivalent tof."
+  },
+  {
+    "type": "code",
+    "content": ">>> uncurry2(pow_curried)(2, 5)\n32\n"
+  },
+  {
+    "type": "h3",
+    "content": "1.6.7   Lambda Expressions"
+  },
+  {
+    "type": "p",
+    "content": "So far, each time we have wanted to define a new function, we needed to give it\na name.  But for other types of expressions, we don't need to associate\nintermediate values with a name. That is, we can computea*b + c*dwithout\nhaving to name the subexpressionsa*borc*d, or the full expression.\nIn Python, we can create function values on the fly usinglambdaexpressions, which evaluate to unnamed functions. A lambda expression evaluates\nto a function that has a single return expression as its body. Assignment and\ncontrol statements are not allowed."
+  },
+  {
+    "type": "code",
+    "content": ">>> def compose1(f, g):\n        return lambda x: f(g(x))\n"
+  },
+  {
+    "type": "p",
+    "content": "We can understand the structure of alambdaexpression by constructing a\ncorresponding English sentence:"
+  },
+  {
+    "type": "p",
+    "content": "The result of a lambda expression is called a lambda function.  It has no\nintrinsic name (and so Python prints<lambda>for the name), but otherwise\nit behaves like any other function."
+  },
+  {
+    "type": "code",
+    "content": ">>> s = lambda x: x * x\n>>> s\n<function <lambda> at 0xf3f490>\n>>> s(12)\n144\n"
+  },
+  {
+    "type": "p",
+    "content": "In an environment diagram, the result of a lambda expression is a function as\nwell, named with the greek letter λ (lambda).  Our compose example can be\nexpressed quite compactly with lambda expressions."
+  },
+  {
+    "type": "p",
+    "content": "Some programmers find that using unnamed functions from lambda expressions\nto be shorter and more direct. However, compoundlambdaexpressions are\nnotoriously illegible, despite their brevity.  The following definition is\ncorrect, but many programmers have trouble understanding it quickly."
+  },
+  {
+    "type": "code",
+    "content": ">>> compose1 = lambda f,g: lambda x: f(g(x))\n"
+  },
+  {
+    "type": "p",
+    "content": "In general, Python style prefers explicitdefstatements to lambda\nexpressions, but allows them in cases where a simple function is needed as an\nargument or return value."
+  },
+  {
+    "type": "p",
+    "content": "Such stylistic rules are merely guidelines; you can program any way you wish.\nHowever, as you write programs, think about the audience of people who might\nread your program one day.  When you can make your program easier to\nunderstand, you do those people a favor."
+  },
+  {
+    "type": "p",
+    "content": "The termlambdais a historical accident resulting from the incompatibility of\nwritten mathematical notation and the constraints of early type-setting\nsystems."
+  },
+  {
+    "type": "p",
+    "content": "It may seem perverse to use lambda to introduce a procedure/function.\nThe notation goes back to Alonzo Church, who in the 1930's started with a\n\"hat\" symbol; he wrote the square function as \"ŷ . y × y\". But frustrated\ntypographers moved the hat to the left of the parameter and changed it to a\ncapital lambda: \"Λy . y × y\"; from there the capital lambda was changed to\nlowercase, and now we see \"λy . y × y\" in math books and(lambda (y) (* y y))in Lisp."
+  },
+  {
+    "type": "p",
+    "content": "—Peter Norvig (norvig.com/lispy2.html)"
+  },
+  {
+    "type": "p",
+    "content": "Despite their unusual etymology,lambdaexpressions and the corresponding\nformal language for function application, thelambda calculus, are fundamental\ncomputer science concepts shared far beyond the Python programming community.\nWe will revisit this topic when we study the design of interpreters in Chapter\n3."
+  },
+  {
+    "type": "h3",
+    "content": "1.6.8   Abstractions and First-Class Functions"
+  },
+  {
+    "type": "p",
+    "content": "We began this section with the observation that user-defined functions are a\ncrucial abstraction mechanism, because they permit us to express general methods\nof computing as explicit elements in our programming language. Now we've seen\nhow higher-order functions permit us to manipulate these general methods to\ncreate further abstractions."
+  },
+  {
+    "type": "p",
+    "content": "As programmers, we should be alert to opportunities to identify the underlying\nabstractions in our programs, build upon them, and generalize them to\ncreate more powerful abstractions. This is not to say that one should always\nwrite programs in the most abstract way possible; expert programmers know how to\nchoose the level of abstraction appropriate to their task. But it is important\nto be able to think in terms of these abstractions, so that we can be ready to\napply them in new contexts. The significance of higher-order functions is that\nthey enable us to represent these abstractions explicitly as elements in our\nprogramming language, so that they can be handled just like other computational\nelements."
+  },
+  {
+    "type": "p",
+    "content": "In general, programming languages impose restrictions on the ways in which\ncomputational elements can be manipulated. Elements with the fewest restrictions\nare said to have first-class status. Some of the \"rights and privileges\" of\nfirst-class elements are:"
+  },
+  {
+    "type": "p",
+    "content": "Python awards functions full first-class status, and the resulting gain in\nexpressive power is enormous."
+  },
+  {
+    "type": "h3",
+    "content": "1.6.9   Function Decorators"
+  },
+  {
+    "type": "p",
+    "content": "Python provides special syntax to apply higher-order functions as part of\nexecuting adefstatement, called a decorator. Perhaps the most common\nexample is a trace."
+  },
+  {
+    "type": "code",
+    "content": ">>> def trace(fn):\n        def wrapped(x):\n            print('-> ', fn, '(', x, ')')\n            return fn(x)\n        return wrapped\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> @trace\n    def triple(x):\n        return 3 * x\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> triple(12)\n->  <function triple at 0x102a39848> ( 12 )\n36\n"
+  },
+  {
+    "type": "p",
+    "content": "In this example, A higher-order functiontraceis defined, which returns a\nfunction that precedes a call to its argument with aprintstatement that\noutputs the argument. Thedefstatement fortriplehas an\nannotation,@trace, which affects the execution rule fordef. As\nusual, the functiontripleis created. However, the nametripleis not\nbound to this function. Instead, the nametripleis bound to the returned\nfunction value of callingtraceon the newly definedtriplefunction.\nIn code, this decorator is equivalent to:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def triple(x):\n        return 3 * x\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> triple = trace(triple)\n"
+  },
+  {
+    "type": "p",
+    "content": "In the projects associated with this text, decorators are used for tracing, as\nwell as selecting which functions to call when a program is run from the\ncommand line."
+  },
+  {
+    "type": "p",
+    "content": "Extra for experts.The decorator symbol@may also be followed by a call\nexpression. The expression following@is evaluated first (just as the nametracewas evaluated above), thedefstatement second, and finally the\nresult of evaluating the decorator expression is applied to the newly defined\nfunction, and the result is bound to the name in thedefstatement. Ashort tutorial on decoratorsby Ariel Ortiz gives further examples for interested students."
+  },
+  {
+    "type": "p",
+    "content": "Continue:1.7 Recursive Functions"
+  }
+]

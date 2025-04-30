@@ -1,0 +1,122 @@
+[
+  {
+    "type": "h2",
+    "content": "3.3   Exceptions"
+  },
+  {
+    "type": "p",
+    "content": "Programmers must be always mindful of possible errors that may arise in their\nprograms. Examples abound: a function may not receive arguments that it is\ndesigned to accept, a necessary resource may be missing, or a connection across\na network may be lost. When designing a program, one must anticipate the\nexceptional circumstances that may arise and take appropriate measures to\nhandle them."
+  },
+  {
+    "type": "p",
+    "content": "There is no single correct approach to handling errors in a program.  Programs\ndesigned to provide some persistent service like a web server should be robust\nto errors, logging them for later consideration but continuing to service new\nrequests as long as possible. On the other hand, the Python interpreter handles\nerrors by terminating immediately and printing an error message, so that\nprogrammers can address issues as soon as they arise. In any case, programmers\nmust make conscious choices about how their programs should react to\nexceptional conditions."
+  },
+  {
+    "type": "p",
+    "content": "Exceptions, the topic of this section, provides a general mechanism for\nadding error-handling logic to programs.Raising an exceptionis a technique\nfor interrupting the normal flow of execution in a program, signaling that\nsome exceptional circumstance has arisen, and returning directly to an\nenclosing part of the program that was designated to react to that\ncircumstance.  The Python interpreter raises an exception each time it detects\nan error in an expression or statement.  Users can also raise exceptions withraiseandassertstatements."
+  },
+  {
+    "type": "p",
+    "content": "Raising exceptions.An exception is a object instance with a class that\ninherits, either directly or indirectly, from theBaseExceptionclass. Theassertstatement introduced in Chapter 1 raises an exception with the classAssertionError.  In general, any exception instance can be raised with theraisestatement. The general form of raise statements are described in thePython\ndocs. The\nmost common use ofraiseconstructs an exception instance and raises it."
+  },
+  {
+    "type": "code",
+    "content": ">>> raise Exception('An error occurred')\nTraceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nException: an error occurred\n"
+  },
+  {
+    "type": "p",
+    "content": "When an exception is raised, no further statements in the current block of code\nare executed. Unless the exception ishandled(described below), the\ninterpreter will return directly to the interactive read-eval-print loop, or\nterminate entirely if Python was started with a file argument. In addition, the\ninterpreter will print astack backtrace, which is a structured block of text\nthat describes the nested set of active function calls in the branch of\nexecution in which the exception was raised. In the example above, the file\nname<stdin>indicates that the exception was raised by the user in an\ninteractive session, rather than from code in a file."
+  },
+  {
+    "type": "p",
+    "content": "Handling exceptions.An exception can be handled by an enclosingtrystatement. Atrystatement consists of multiple clauses; the first begins\nwithtryand the rest begin withexcept:"
+  },
+  {
+    "type": "p",
+    "content": "The<try suite>is always executed immediately when thetrystatement\nis executed.  Suites of theexceptclauses are only executed when an\nexception is raised during the course of executing the<try suite>. Eachexceptclause specifies the particular class of exception to handle. For\ninstance, if the<exception class>isAssertionError, then any instance\nof a class inheriting fromAssertionErrorthat is raised during the course\nof executing the<try suite>will be handled by the following<except\nsuite>. Within the<except suite>, the identifier<name>is bound to\nthe exception object that was raised, but this binding does not persist beyond\nthe<except suite>."
+  },
+  {
+    "type": "p",
+    "content": "For example, we can handle aZeroDivisionErrorexception using atrystatement that binds the namexto 0 when the exception is raised."
+  },
+  {
+    "type": "code",
+    "content": ">>> try:\n        x = 1/0\n    except ZeroDivisionError as e:\n        print('handling a', type(e))\n        x = 0\nhandling a <class 'ZeroDivisionError'>\n>>> x\n0\n"
+  },
+  {
+    "type": "p",
+    "content": "Atrystatement will handle exceptions that occur within the body of a\nfunction that is applied (either directly or indirectly) within the<try\nsuite>.  When an exception is raised, control jumps directly to the body of\nthe<except suite>of the most recenttrystatement that handles that\ntype of exception."
+  },
+  {
+    "type": "code",
+    "content": ">>> def invert(x):\n        result = 1/x  # Raises a ZeroDivisionError if x is 0\n        print('Never printed if x is 0')\n        return result\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def invert_safe(x):\n        try:\n            return invert(x)\n        except ZeroDivisionError as e:\n            return str(e)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> invert_safe(2)\nNever printed if x is 0\n0.5\n>>> invert_safe(0)\n'division by zero'\n"
+  },
+  {
+    "type": "p",
+    "content": "This example illustrates that theprintexpression ininvertis never\nevaluated, and instead control is transferred to the suite of theexceptclause ininvert_safe. Coercing theZeroDivisionErroreto a\nstring gives the human-interpretable string returned byinvert_safe:'division by zero'."
+  },
+  {
+    "type": "h3",
+    "content": "3.3.1   Exception Objects"
+  },
+  {
+    "type": "p",
+    "content": "Exception objects themselves can have attributes, such as the error message\nstated in anassertstatement and information about where in the course of\nexecution the exception was raised. User-defined exception classes can have\nadditional attributes."
+  },
+  {
+    "type": "p",
+    "content": "In Chapter 1, we implemented Newton's method to find the zeros of arbitrary\nfunctions. The following example defines an exception class that returns the\nbest guess discovered in the course of iterative improvement whenever aValueErroroccurs. A math domain error (a type ofValueError) is raised\nwhensqrtis applied to a negative number. This exception is handled by\nraising anIterImproveErrorthat stores the most recent guess from Newton's\nmethod as an attribute."
+  },
+  {
+    "type": "p",
+    "content": "First, we define a new class that inherits fromException."
+  },
+  {
+    "type": "code",
+    "content": ">>> class IterImproveError(Exception):\n        def __init__(self, last_guess):\n            self.last_guess = last_guess\n"
+  },
+  {
+    "type": "p",
+    "content": "Next, we define a version ofimprove, our generic iterative improvement\nalgorithm.  This version handles anyValueErrorby raising anIterImproveErrorthat stores the most recent guess. As before,improvetakes as arguments two functions, each of which takes a\nsingle numerical argument. Theupdatefunction returns new guesses, while\nthedonefunction returns a boolean indicating that improvement has\nconverged to a correct value."
+  },
+  {
+    "type": "code",
+    "content": ">>> def improve(update, done, guess=1, max_updates=1000):\n        k = 0\n        try:\n            while not done(guess) and k < max_updates:\n                guess = update(guess)\n                k = k + 1\n            return guess\n        except ValueError:\n            raise IterImproveError(guess)\n"
+  },
+  {
+    "type": "p",
+    "content": "Finally, we definefind_zero, which returns the result ofimproveapplied to a Newton update function returned bynewton_update, which is\ndefined in Chapter 1 and requires no changes for this example. This version offind_zerohandles anIterImproveErrorby returning its last guess."
+  },
+  {
+    "type": "code",
+    "content": ">>> def find_zero(f, guess=1):\n        def done(x):\n            return f(x) == 0\n        try:\n            return improve(newton_update(f), done, guess)\n        except IterImproveError as e:\n            return e.last_guess\n"
+  },
+  {
+    "type": "p",
+    "content": "Consider applyingfind_zeroto find the zero of the function$2x^2 + \\sqrt{x}$. This function has a zero at 0, but evaluating\nit on any negative number will raise aValueError. Our Chapter 1\nimplementation of Newton's Method would raise that error and fail to return any\nguess of the zero. Our revised implementation returns the last guess found\nbefore the error."
+  },
+  {
+    "type": "code",
+    "content": ">>> from math import sqrt\n>>> find_zero(lambda x: 2*x*x + sqrt(x))\n-0.030211203830201594\n"
+  },
+  {
+    "type": "p",
+    "content": "Although this approximation is still far from the correct answer of 0, some\napplications would prefer this coarse approximation to aValueError."
+  },
+  {
+    "type": "p",
+    "content": "Exceptions are another technique that help us as programs to separate the\nconcerns of our program into modular parts.  In this example, Python's\nexception mechanism allowed us to separate the logic for iterative improvement,\nwhich appears unchanged in the suite of thetryclause, from the logic for\nhandling errors, which appears inexceptclauses. We will also find that\nexceptions are a useful feature when implementing interpreters in Python."
+  },
+  {
+    "type": "p",
+    "content": "Continue:3.4 Interpreters for Languages with Combination"
+  }
+]

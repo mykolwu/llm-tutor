@@ -1,0 +1,38 @@
+[
+  {
+    "type": "h2",
+    "content": "3.1   Introduction"
+  },
+  {
+    "type": "p",
+    "content": "Chapters 1 and 2 describe the close connection between two fundamental\nelements of programming: functions and data.  We saw how functions can be\nmanipulated as data using higher-order functions. We also saw how data can be\nendowed with behavior using message passing and an object system. We have also\nstudied techniques for organizing large programs, such as functional\nabstraction, data abstraction, class inheritance, and generic functions. These\ncore concepts constitute a strong foundation upon which to build modular,\nmaintainable, and extensible programs."
+  },
+  {
+    "type": "p",
+    "content": "This chapter focuses on the third fundamental element of programming: programs\nthemselves. A Python program is just a collection of text.  Only through the\nprocess of interpretation do we perform any meaningful computation based on\nthat text.  A programming language like Python is useful because we can define\naninterpreter, a program that carries out Python's evaluation and execution\nprocedures.  It is no exaggeration to regard this as the most fundamental idea\nin programming, that an interpreter, which determines the meaning of\nexpressions in a programming language, is just another program."
+  },
+  {
+    "type": "p",
+    "content": "To appreciate this point is to change our images of ourselves as programmers.\nWe come to see ourselves as designers of languages, rather than only users of\nlanguages designed by others."
+  },
+  {
+    "type": "h3",
+    "content": "3.1.1   Programming Languages"
+  },
+  {
+    "type": "p",
+    "content": "Programming languages vary widely in their syntactic structures, features, and\ndomain of application. Among general purpose programming languages, the\nconstructs of function definition and function application are pervasive.  On\nthe other hand, powerful languages exist that do not include an object system,\nhigher-order functions, assignment,  or even control constructs such aswhileandforstatements. As an example of a powerful language with a\nminimal set of features, we will introduce theSchemeprogramming language. The subset of Scheme introduced in this text does not\nallow mutable values at all."
+  },
+  {
+    "type": "p",
+    "content": "In this chapter, we study the design of interpreters and the computational\nprocesses that they create when executing programs. The prospect of designing\nan interpreter for a general programming language may seem daunting. After all,\ninterpreters are programs that can carry out any possible computation,\ndepending on their input.  However, many interpreters have an elegant common\nstructure: two mutually recursive functions.  The first evaluates expressions\nin environments; the second applies functions to arguments."
+  },
+  {
+    "type": "p",
+    "content": "These functions are recursive in that they are defined in terms of each other:\napplying a function requires evaluating the expressions in its body, while\nevaluating an expression may involve applying one or more functions."
+  },
+  {
+    "type": "p",
+    "content": "Continue:3.2 Functional Programming"
+  }
+]

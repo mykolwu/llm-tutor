@@ -1,0 +1,474 @@
+[
+  {
+    "type": "h2",
+    "content": "4.2   Implicit Sequences"
+  },
+  {
+    "type": "p",
+    "content": "A sequence can be represented without each element being stored explicitly\nin the memory of the computer. That is, we can construct an object that provides\naccess to all of the elements of some sequential dataset without computing the\nvalue of each element in advance. Instead, we compute elements on demand."
+  },
+  {
+    "type": "p",
+    "content": "An example of this idea arises in therangecontainer type introduced in\nChapter 2. Arangerepresents a consecutive, bounded sequence of integers.\nHowever, it is not the case that each element of that sequence is represented\nexplicitly in memory.  Instead, when an element is requested from arange,\nit is computed. Hence, we can represent very large ranges of integers without\nusing large blocks of memory. Only the end points of the range are stored as\npart of therangeobject."
+  },
+  {
+    "type": "code",
+    "content": ">>> r = range(10000, 1000000000)\n>>> r[45006230]\n45016230\n"
+  },
+  {
+    "type": "p",
+    "content": "In this example, not all 999,990,000 integers in this range are stored when the\nrange instance is constructed.  Instead, the range object adds the first element\n10,000 to the index 45,006,230 to produce the element 45,016,230. Computing\nvalues on demand, rather than retrieving them from an existing representation,\nis an example oflazycomputation. In computer science,lazy computationdescribes any program that delays the computation of a value until that value is\nneeded."
+  },
+  {
+    "type": "h3",
+    "content": "4.2.1   Iterators"
+  },
+  {
+    "type": "p",
+    "content": "Python and many other programming languages provide a unified way to process\nelements of a container value sequentially, called an iterator.  Aniteratoris an object that provides sequential access to values, one by one."
+  },
+  {
+    "type": "p",
+    "content": "The iterator abstraction has two components: a mechanism for retrieving the next\nelement in the sequence being processed and a mechanism for signaling that the\nend of the sequence has been reached and no further elements remain. For any\ncontainer, such as a list or range, an iterator can be obtained by calling the\nbuilt-initerfunction. The contents of the iterator can be accessed by\ncalling the built-innextfunction."
+  },
+  {
+    "type": "code",
+    "content": ">>> primes = [2, 3, 5, 7]\n>>> type(primes)\n>>> iterator = iter(primes)\n>>> type(iterator)\n>>> next(iterator)\n2\n>>> next(iterator)\n3\n>>> next(iterator)\n5\n"
+  },
+  {
+    "type": "p",
+    "content": "The way that Python signals that there are no more values available is to\nraise aStopIterationexception whennextis called. This exception can\nbe handled using atrystatement."
+  },
+  {
+    "type": "code",
+    "content": ">>> next(iterator)\n7\n>>> next(iterator)\nTraceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nStopIteration\n>>> try:\n        next(iterator)\n    except StopIteration:\n        print('No more values')\nNo more values\n"
+  },
+  {
+    "type": "p",
+    "content": "An iterator maintains local state to represent its position in a sequence. Each\ntimenextis called, that position advances. Two separate iterators can\ntrack two different positions in the same sequence. However, two names for the\nsame iterator will share a position, because they share the same value."
+  },
+  {
+    "type": "code",
+    "content": ">>> r = range(3, 13)\n>>> s = iter(r)  # 1st iterator over r\n>>> next(s)\n3\n>>> next(s)\n4\n>>> t = iter(r)  # 2nd iterator over r\n>>> next(t)\n3\n>>> next(t)\n4\n>>> u = t        # Alternate name for the 2nd iterator\n>>> next(u)\n5\n>>> next(u)\n6\n"
+  },
+  {
+    "type": "p",
+    "content": "Advancing the second iterator does not affect the first. Since the last value\nreturned from the first iterator was 4, it is positioned to return 5 next. On\nthe other hand, the second iterator is positioned to return 7 next."
+  },
+  {
+    "type": "code",
+    "content": ">>> next(s)\n5\n>>> next(t)\n7\n"
+  },
+  {
+    "type": "p",
+    "content": "Callingiteron an iterator will return that iterator, not a copy. This\nbehavior is included in Python so that a programmer can calliteron a\nvalue to get an iterator without having to worry about whether it is an iterator\nor a container."
+  },
+  {
+    "type": "code",
+    "content": ">>> v = iter(t)  # Another alterante name for the 2nd iterator\n>>> next(v)\n8\n>>> next(u)\n9\n>>> next(t)\n10\n"
+  },
+  {
+    "type": "p",
+    "content": "The usefulness of iterators is derived from the fact that the underlying\nseries of data for an iterator may not be represented explicitly in memory.\nAn iterator provides a mechanism for considering each of a series of values in\nturn, but all of those elements do not need to be stored simultaneously.\nInstead, when the next element is requested from an iterator, that element may\nbe computed on demand instead of being retrieved from an existing memory\nsource."
+  },
+  {
+    "type": "p",
+    "content": "Ranges are able to compute the elements of a sequence lazily because the\nsequence represented is uniform, and any element is easy to compute from the\nstarting and ending bounds of the range. Iterators allow for lazy generation of\na much broader class of underlying sequential datasets, because they do not need\nto provide access to arbitrary elements of the underlying series. Instead,\niterators are only required to compute the next element of the series, in order,\neach time another element is requested. While not as flexible as accessing\narbitrary elements of a sequence (calledrandom access),sequential accessto sequential data is often sufficient for data processing applications."
+  },
+  {
+    "type": "h3",
+    "content": "4.2.2   Iterables"
+  },
+  {
+    "type": "p",
+    "content": "Any value that can produce iterators is called aniterablevalue. In Python,\nan iterable value is anything that can be passed to the built-initerfunction. Iterables include sequence values such as strings and tuples, as well\nas other containers such as sets and dictionaries. Iterators are also iterables,\nbecause they can be passed to theiterfunction."
+  },
+  {
+    "type": "p",
+    "content": "Even unordered collections such as dictionaries must define an ordering over\ntheir contents when they produce iterators. Dictionaries and sets are unordered\nbecause the programmer has no control over the order of iteration, but Python\ndoes guarantee certain properties about their order in its specification."
+  },
+  {
+    "type": "p",
+    "content": "TODO block quote"
+  },
+  {
+    "type": "code",
+    "content": ">>> d = {'one': 1, 'two': 2, 'three': 3}\n>>> d\n{'one': 1, 'three': 3, 'two': 2}\n>>> k = iter(d)\n>>> next(k)\n'one'\n>>> next(k)\n'three'\n>>> v = iter(d.values())\n>>> next(v)\n1\n>>> next(v)\n3\n"
+  },
+  {
+    "type": "p",
+    "content": "If a dictionary changes in structure because a key is added or removed, then all\niterators become invalid and future iterators may exhibit arbitrary changes to\nthe order their contents. On the other hand, changing the value of an existing\nkey does not change the order of the contents or invalidate iterators."
+  },
+  {
+    "type": "code",
+    "content": ">>> d.pop('two')\n2\n>>> next(k)\n       \nRuntimeError: dictionary changed size during iteration\nTraceback (most recent call last):\n"
+  },
+  {
+    "type": "h3",
+    "content": "4.2.3   Built-in Iterators"
+  },
+  {
+    "type": "p",
+    "content": "Several built-in functions take as arguments iterable values and return\niterators. These functions are used extensively for lazy sequence processing."
+  },
+  {
+    "type": "p",
+    "content": "Themapfunction is lazy: calling it does not perform the computation\nrequired to compute elements of its result. Instead, an iterator object is\ncreated that can return results if queried usingnext. We can observe this\nfact in the following example, in which the call toprintis delayed until\nthe corresponding element is requested from thedoublediterator."
+  },
+  {
+    "type": "code",
+    "content": ">>> def double_and_print(x):\n        print('***', x, '=>', 2*x, '***')\n        return 2*x\n>>> s = range(3, 7)\n>>> doubled = map(double_and_print, s)  # double_and_print not yet called\n>>> next(doubled)                       # double_and_print called once\n*** 3 => 6 ***\n6\n>>> next(doubled)                       # double_and_print called again\n*** 4 => 8 ***\n8\n>>> list(doubled)                       # double_and_print called twice more\n*** 5 => 10 ***\n*** 6 => 12 ***\n[10, 12]\n"
+  },
+  {
+    "type": "p",
+    "content": "Thefilterfunction returns an iterator over,zip, andreversedfunctions also return iterators."
+  },
+  {
+    "type": "p",
+    "content": "TODO demonstrate these values"
+  },
+  {
+    "type": "h3",
+    "content": "4.2.4   For Statements"
+  },
+  {
+    "type": "p",
+    "content": "Theforstatement in Python operates on iterators. Objects areiterable(an interface) if they have an__iter__method that returns aniterator.\nIterable objects can be the value of the<expression>in the header of aforstatement:"
+  },
+  {
+    "type": "p",
+    "content": "To execute aforstatement, Python evaluates the header<expression>,\nwhich must yield an iterable value.  Then, the__iter__method is invoked\non that value. Until aStopIterationexception is raised, Python repeatedly\ninvokes the__next__method on that iterator and binds the result to the<name>in theforstatement. Then, it executes the<suite>."
+  },
+  {
+    "type": "code",
+    "content": ">>> counts = [1, 2, 3]\n>>> for item in counts:\n        print(item)\n1\n2\n3\n"
+  },
+  {
+    "type": "p",
+    "content": "In the above example, thecountslist returns an iterator from its__iter__()method. Theforstatement then calls that iterator's__next__()method repeatedly, and assigns the returned value toitemeach time. This process continues until the iterator raises aStopIterationexception, at which point execution of theforstatement concludes."
+  },
+  {
+    "type": "p",
+    "content": "With our knowledge of iterators, we can implement the execution rule of aforstatement in terms ofwhile, assignment, andtrystatements."
+  },
+  {
+    "type": "code",
+    "content": ">>> items = counts.__iter__()\n>>> try:\n        while True:\n            item = items.__next__()\n            print(item)\n    except StopIteration:\n        pass\n1\n2\n3\n"
+  },
+  {
+    "type": "p",
+    "content": "Above, the iterator returned by invoking the__iter__method ofcountsis bound to a nameitemsso that it can be queried for each element in\nturn.  The handling clause for theStopIterationexception does nothing,\nbut handling the exception provides a control mechanism for exiting thewhileloop."
+  },
+  {
+    "type": "p",
+    "content": "To use an iterator in a for loop, the iterator must also have an__iter__method.  TheIterator types <http://docs.python.org/3/library/stdtypes.html#iterator-types>\n`_ section of the Python docs suggest that an iterator have an ``__iter__`method that returns the iterator itself, so that all iterators are iterable."
+  },
+  {
+    "type": "h3",
+    "content": "4.2.5   Generators and Yield Statements"
+  },
+  {
+    "type": "p",
+    "content": "TheLettersandPositivesobjects above require us to introduce a new\nfieldself.currentinto our object to keep track of progress through the\nsequence. With simple sequences like those shown above, this can be done\neasily. With complex sequences, however, it can be quite difficult for the__next__method to save its place in the calculation. Generators allow\nus to define more complicated iterations by leveraging the features of the\nPython interpreter."
+  },
+  {
+    "type": "p",
+    "content": "Ageneratoris an iterator returned by a special class of function called agenerator function. Generator functions are distinguished from regular\nfunctions in that rather than containingreturnstatements in their body,\nthey useyieldstatement to return elements of a series."
+  },
+  {
+    "type": "p",
+    "content": "Generators do not use attributes of an object to track their progress through\na series. Instead, they control the execution of the generator function, which\nruns until the nextyieldstatement is executed each time the generator's__next__method is invoked. TheLettersiterator can be implemented\nmuch more compactly using a generator function."
+  },
+  {
+    "type": "code",
+    "content": ">>> def letters_generator():\n        current = 'a'\n        while current <= 'd':\n            yield current\n            current = chr(ord(current)+1)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> for letter in letters_generator():\n        print(letter)\na\nb\nc\nd\n"
+  },
+  {
+    "type": "p",
+    "content": "Even though we never explicitly defined__iter__or__next__methods, theyieldstatement indicates that we are defining a generator\nfunction.  When called, a generator function doesn't return a particular\nyielded value, but instead agenerator(which is a type of iterator) that\nitself can return the yielded values. A generator object has__iter__and__next__methods, and each call to__next__continues execution of the\ngenerator function from wherever it left off previously until anotheryieldstatement is executed."
+  },
+  {
+    "type": "p",
+    "content": "The first time__next__is called, the program executes statements from\nthe body of theletters_generatorfunction until it encounters theyieldstatement. Then, it pauses and returns the value ofcurrent.yieldstatements do not destroy the newly created environment, they\npreserve it for later. When__next__is called again, execution resumes\nwhere it left off. The values ofcurrentand of any other bound names in\nthe scope ofletters_generatorare preserved across subsequent calls to__next__."
+  },
+  {
+    "type": "p",
+    "content": "We can walk through the generator by manually calling____next__():"
+  },
+  {
+    "type": "code",
+    "content": ">>> letters = letters_generator()\n>>> type(letters)\n<class 'generator'>\n>>> letters.__next__()\n'a'\n>>> letters.__next__()\n'b'\n>>> letters.__next__()\n'c'\n>>> letters.__next__()\n'd'\n>>> letters.__next__()\nTraceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nStopIteration\n"
+  },
+  {
+    "type": "p",
+    "content": "The generator does not start executing any of the body statements of its\ngenerator function until the first time__next__is invoked. The generator\nraises aStopIterationexception whenever its generator function returns."
+  },
+  {
+    "type": "h3",
+    "content": "4.2.6   Iterable Interface"
+  },
+  {
+    "type": "p",
+    "content": "An object is iterable if it returns an iterator when its__iter__method is\ninvoked. Iterable values represent data collections, and they provide a fixed\nrepresentation that may produce more than one iterator."
+  },
+  {
+    "type": "p",
+    "content": "For example, an instance of theLettersclass below represents a sequence of\nconsecutive letters.  Each time its__iter__method is invoked, a newLetterIterinstance is constructed, which allows for sequential access to\nthe contents of the sequence."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Letters:\n        def __init__(self, start='a', end='e'):\n            self.start = start\n            self.end = end\n        def __iter__(self):\n            return LetterIter(self.start, self.end)\n"
+  },
+  {
+    "type": "p",
+    "content": "The built-initerfunction invokes the__iter__method on its argument.\nIn the sequence of expressions below, two iterators derived from the same\niterable sequence independently yield letters in sequence."
+  },
+  {
+    "type": "code",
+    "content": ">>> b_to_k = Letters('b', 'k')\n>>> first_iterator = b_to_k.__iter__()\n>>> next(first_iterator)\n'b'\n>>> next(first_iterator)\n'c'\n>>> second_iterator = iter(b_to_k)\n>>> second_iterator.__next__()\n'b'\n>>> first_iterator.__next__()\n'd'\n>>> first_iterator.__next__()\n'e'\n>>> second_iterator.__next__()\n'c'\n>>> second_iterator.__next__()\n'd'\n"
+  },
+  {
+    "type": "p",
+    "content": "The iterableLettersinstanceb_to_kand theLetterIteriterator\ninstancesfirst_iteratorandsecond_iteratorare different in that theLettersinstance does not change, while the iterator instances do change\nwith each call tonext(or equivalently, each invocation of__next__).\nThe iterator tracks progress through sequential data, while an iterable\nrepresents the data itself."
+  },
+  {
+    "type": "p",
+    "content": "Many built-in functions in Python take iterable arguments and return iterators.\nThemapfunction, for example, takes a function and an iterable. It returns\nan iterator over the result of applying the function argument to each element\nin the iterable argument."
+  },
+  {
+    "type": "code",
+    "content": ">>> caps = map(lambda x: x.upper(), b_to_k)\n>>> next(caps)\n'B'\n>>> next(caps)\n'C'\n"
+  },
+  {
+    "type": "h3",
+    "content": "4.2.7   Creating Iterables with Yield"
+  },
+  {
+    "type": "p",
+    "content": "In Python, iterators only make a single pass over the elements of an underlying\nseries. After that pass, the iterator will continue to raise aStopIterationexception when__next__is invoked. Many applications\nrequire iteration over elements multiple times. For example, we have to iterate\nover a list many times in order to enumerate all pairs of elements."
+  },
+  {
+    "type": "code",
+    "content": ">>> def all_pairs(s):\n        for item1 in s:\n            for item2 in s:\n                yield (item1, item2)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> list(all_pairs([1, 2, 3]))\n[(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]\n"
+  },
+  {
+    "type": "p",
+    "content": "Sequences are not themselves iterators, but insteaditerableobjects. The\niterable interface in Python consists of a single message,__iter__, that\nreturns an iterator. The built-in sequence types in Python return new instances\nof iterators when their__iter__methods are invoked.  If an iterable\nobject returns a fresh instance of an iterator each time__iter__is\ncalled, then it can be iterated over multiple times."
+  },
+  {
+    "type": "p",
+    "content": "New iterable classes can be defined by implementing the iterable interface. For\nexample, theiterableLettersWithYieldclass below returns a new iterator\nover letters each time__iter__is invoked."
+  },
+  {
+    "type": "code",
+    "content": ">>> class LettersWithYield:\n        def __init__(self, start='a', end='e'):\n            self.start = start\n            self.end = end\n        def __iter__(self):\n            next_letter = self.start\n            while next_letter < self.end:\n                yield next_letter\n                next_letter = chr(ord(next_letter)+1)\n"
+  },
+  {
+    "type": "p",
+    "content": "The__iter__method is a generator function; it returns a generator object\nthat yields the letters'a'through'd'and then stops.  Each time we\ninvoke this method, a new generator starts a fresh pass through the sequential\ndata."
+  },
+  {
+    "type": "code",
+    "content": ">>> letters = LettersWithYield()\n>>> list(all_pairs(letters))[:5]\n[('a', 'a'), ('a', 'b'), ('a', 'c'), ('a', 'd'), ('b', 'a')]\n"
+  },
+  {
+    "type": "h3",
+    "content": "4.2.8   Iterator Interface"
+  },
+  {
+    "type": "p",
+    "content": "The Python iterator interface is defined using a method called__next__that returns the next element of some underlying sequential series that it\nrepresents. In response to invoking__next__, an iterator can perform\narbitrary computation in order to either retrieve or compute the next element.\nCalls to__next__make a mutating change to the iterator: they advance the\nposition of the iterator. Hence, multiple calls to__next__will return\nsequential elements of an underlying series. Python signals that the end of an\nunderlying series has been reached by raising aStopIterationexception\nduring a call to__next__."
+  },
+  {
+    "type": "p",
+    "content": "TheLetterIterclass below iterates over an underlying series of letters\nfrom somestartletter up to but not including someendletter.  The\ninstance attributenext_letterstores the next letter to be returned. The__next__method returns this letter and uses it to compute a newnext_letter."
+  },
+  {
+    "type": "code",
+    "content": ">>> class LetterIter:\n        \"\"\"An iterator over letters of the alphabet in ASCII order.\"\"\"\n        def __init__(self, start='a', end='e'):\n            self.next_letter = start\n            self.end = end\n        def __next__(self):\n            if self.next_letter == self.end:\n                raise StopIteration\n            letter = self.next_letter\n            self.next_letter = chr(ord(letter)+1)\n            return letter\n"
+  },
+  {
+    "type": "p",
+    "content": "Using this class, we can access letters in sequence using either the__next__method or the built-innextfunction, which invokes__next__on its argument."
+  },
+  {
+    "type": "code",
+    "content": ">>> letter_iter = LetterIter()\n>>> letter_iter.__next__()\n'a'\n>>> letter_iter.__next__()\n'b'\n>>> next(letter_iter)\n'c'\n>>> letter_iter.__next__()\n'd'\n>>> letter_iter.__next__()\nTraceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\n  File \"<stdin>\", line 12, in next\nStopIteration\n"
+  },
+  {
+    "type": "p",
+    "content": "Iterators are mutable: they track the position in some underlying sequence of\nvalues as they progress. When the end is reached, the iterator is used up. ALetterIterinstance can only be iterated through once. After its__next__()method raises aStopIterationexception, it continues to do\nso from then on. Typically, an iterator is not reset; instead a new instance is\ncreated to start a new iteration."
+  },
+  {
+    "type": "p",
+    "content": "Iterators also allow us to represent infinite series by implementing a__next__method that never raises aStopIterationexception. For\nexample, thePositivesclass below iterates over the infinite series of\npositive integers. The built-innextfunction in Python invokes the__next__method on its argument."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Positives:\n        def __init__(self):\n            self.next_positive = 1;\n        def __next__(self):\n            result = self.next_positive\n            self.next_positive += 1\n            return result\n>>> p = Positives()\n>>> next(p)\n1\n>>> next(p)\n2\n>>> next(p)\n3\n"
+  },
+  {
+    "type": "h3",
+    "content": "4.2.9   Streams"
+  },
+  {
+    "type": "p",
+    "content": "TODO"
+  },
+  {
+    "type": "h3",
+    "content": "4.2.10   Python Streams"
+  },
+  {
+    "type": "p",
+    "content": "Streamsoffer another way to represent sequential data implicitly.  A stream\nis a lazily computed linked list.  Like theLinkclass from Chapter 2,\naStreaminstance responds to requests for itsfirstelement and therestof the stream. Like anLink, therestof aStreamis\nitself aStream.  Unlike anLink, therestof a stream is only\ncomputed when it is looked up, rather than being stored in advance. That is,\ntherestof a stream is computed lazily."
+  },
+  {
+    "type": "p",
+    "content": "To achieve this lazy evaluation, a stream stores a function that computes the\nrest of the stream.  Whenever this function is called, its returned value is\ncached as part of the stream in an attribute called_rest, named with an\nunderscore to indicate that it should not be accessed directly."
+  },
+  {
+    "type": "p",
+    "content": "The accessible attributerestis a property method that returns the rest of\nthe stream, computing it if necessary.  With this design, a stream storeshow\nto computethe rest of the stream, rather than always storing the rest\nexplicitly."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Stream:\n        \"\"\"A lazily computed linked list.\"\"\"\n        class empty:\n            def __repr__(self):\n                return 'Stream.empty'\n        empty = empty()\n        def __init__(self, first, compute_rest=lambda: empty):\n            assert callable(compute_rest), 'compute_rest must be callable.'\n            self.first = first\n            self._compute_rest = compute_rest\n        @property\n        def rest(self):\n            \"\"\"Return the rest of the stream, computing it if necessary.\"\"\"\n            if self._compute_rest is not None:\n                self._rest = self._compute_rest()\n                self._compute_rest = None\n            return self._rest\n        def __repr__(self):\n            return 'Stream({0}, <...>)'.format(repr(self.first))\n"
+  },
+  {
+    "type": "p",
+    "content": "A linked list is defined using a nested expression.  For example,\nwe can create anLinkthat represents the elements 1 then 5 as\nfollows:"
+  },
+  {
+    "type": "code",
+    "content": ">>> r = Link(1, Link(2+3, Link(9)))\n"
+  },
+  {
+    "type": "p",
+    "content": "Likewise, we can create aStreamrepresenting the same series.  TheStreamdoes not actually compute the second element 5 until the rest of the\nstream is requested. We achieve this effect by creating anonymous functions."
+  },
+  {
+    "type": "code",
+    "content": ">>> s = Stream(1, lambda: Stream(2+3, lambda: Stream(9)))\n"
+  },
+  {
+    "type": "p",
+    "content": "Here, 1 is the first element of the stream, and thelambdaexpression\nthat follows returns a function for computing the rest of the stream."
+  },
+  {
+    "type": "p",
+    "content": "Accessing the elements of linked listrand streamsproceed\nsimilarly.  However, while 5 is stored withinr, it is computed on\ndemand forsvia addition, the first time that it is requested."
+  },
+  {
+    "type": "code",
+    "content": ">>> r.first\n1\n>>> s.first\n1\n>>> r.rest.first\n5\n>>> s.rest.first\n5\n>>> r.rest\nLink(5, Link(9))\n>>> s.rest\nStream(5, <...>)\n"
+  },
+  {
+    "type": "p",
+    "content": "While therestofris a two-element linked list, therestofsincludes a function to compute the rest; the fact that it will return the\nempty stream may not yet have been discovered."
+  },
+  {
+    "type": "p",
+    "content": "When aStreaminstance is constructed, the fieldself._restisNone,\nsignifying that the rest of theStreamhas not yet been computed. When therestattribute is requested via a dot expression, therestproperty\nmethod is invoked, which triggers computation withself._rest =\nself._compute_rest().  Because of the caching mechanism within aStream,\nthecompute_restfunction is only ever called once, then discarded."
+  },
+  {
+    "type": "p",
+    "content": "The essential properties of acompute_restfunction are that it takes no\narguments, and it returns aStreamorStream.empty."
+  },
+  {
+    "type": "p",
+    "content": "Lazy evaluation gives us the ability to represent infinite sequential datasets\nusing streams. For example, we can represent increasing integers, starting at\nanyfirstvalue."
+  },
+  {
+    "type": "code",
+    "content": ">>> def integer_stream(first):\n        def compute_rest():\n            return integer_stream(first+1)\n        return Stream(first, compute_rest)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> positives = integer_stream(1)\n>>> positives\nStream(1, <...>)\n>>> positives.first\n1\n"
+  },
+  {
+    "type": "p",
+    "content": "Wheninteger_streamis called for the first time, it returns a stream whosefirstis the first integer in the sequence. However,integer_streamis\nactually recursive because this stream'scompute_restcallsinteger_streamagain, with an incremented argument. We say thatinteger_streamis lazy because the recursive call tointeger_streamis\nonly made whenever therestof an integer stream is requested."
+  },
+  {
+    "type": "code",
+    "content": ">>> positives.first\n1\n>>> positives.rest.first\n2\n>>> positives.rest.rest\nStream(3, <...>)\n"
+  },
+  {
+    "type": "p",
+    "content": "The same higher-order functions that manipulate sequences --mapandfilter-- also apply to streams, although their implementations must change\nto apply their argument functions lazily.  The functionmap_streammaps a\nfunction over a stream, which produces a new stream.  The locally definedcompute_restfunction ensures that the function will be mapped onto the\nrest of the stream whenever the rest is computed."
+  },
+  {
+    "type": "code",
+    "content": ">>> def map_stream(fn, s):\n        if s is Stream.empty:\n            return s\n        def compute_rest():\n            return map_stream(fn, s.rest)\n        return Stream(fn(s.first), compute_rest)\n"
+  },
+  {
+    "type": "p",
+    "content": "A stream can be filtered by defining acompute_restfunction that applies\nthe filter function to the rest of the stream.  If the filter function rejects\nthe first element of the stream, the rest is computed immediately.  Becausefilter_streamis recursive, the rest may be computed multiple times until a\nvalidfirstelement is found."
+  },
+  {
+    "type": "code",
+    "content": ">>> def filter_stream(fn, s):\n        if s is Stream.empty:\n            return s\n        def compute_rest():\n            return filter_stream(fn, s.rest)\n        if fn(s.first):\n            return Stream(s.first, compute_rest)\n        else:\n            return compute_rest()\n"
+  },
+  {
+    "type": "p",
+    "content": "Themap_streamandfilter_streamfunctions exhibit a common pattern in\nstream processing: a locally definedcompute_restfunction recursively\napplies a processing function to the rest of the stream whenever the rest is\ncomputed."
+  },
+  {
+    "type": "p",
+    "content": "To inspect the contents of a stream, we can coerce up to the firstkelements to a Pythonlist."
+  },
+  {
+    "type": "code",
+    "content": ">>> def first_k_as_list(s, k):\n        first_k = []\n        while s is not Stream.empty and k > 0:\n            first_k.append(s.first)\n            s, k = s.rest, k-1\n        return first_k\n"
+  },
+  {
+    "type": "p",
+    "content": "These convenience functions allow us to verify ourmap_streamimplementation with a simple example that squares the integers from 3 to\n7."
+  },
+  {
+    "type": "code",
+    "content": ">>> s = integer_stream(3)\n>>> s\nStream(3, <...>)\n>>> m = map_stream(lambda x: x*x, s)\n>>> m\nStream(9, <...>)\n>>> first_k_as_list(m, 5)\n[9, 16, 25, 36, 49]\n"
+  },
+  {
+    "type": "p",
+    "content": "We can use ourfilter_streamfunction to define a stream of prime numbers\nusing the sieve of Eratosthenes, which filters a stream of integers to remove\nall numbers that are multiples of its first element.  By successively filtering\nwith each prime, all composite numbers are removed from the stream."
+  },
+  {
+    "type": "code",
+    "content": ">>> def primes(pos_stream):\n        def not_divible(x):\n            return x % pos_stream.first != 0\n        def compute_rest():\n            return primes(filter_stream(not_divible, pos_stream.rest))\n        return Stream(pos_stream.first, compute_rest)\n"
+  },
+  {
+    "type": "p",
+    "content": "By truncating theprimesstream, we can enumerate any prefix of the prime\nnumbers."
+  },
+  {
+    "type": "code",
+    "content": ">>> prime_numbers = primes(integer_stream(2))\n>>> first_k_as_list(prime_numbers, 7)\n[2, 3, 5, 7, 11, 13, 17]\n"
+  },
+  {
+    "type": "p",
+    "content": "Streams contrast with iterators in that they can be passed to pure functions\nmultiple times and yield the same result each time.  The primes stream is not\n\"used up\" by converting it to a list.  That is, thefirstelement ofprime_numbersis still 2 after converting the prefix of the stream to a\nlist."
+  },
+  {
+    "type": "code",
+    "content": ">>> prime_numbers.first\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "Just as linked lists provide a simple implementation of the sequence\nabstraction, streams provide a simple, functional, recursive data structure\nthat implements lazy evaluation through the use of higher-order functions."
+  },
+  {
+    "type": "p",
+    "content": "Continue:4.3 Declarative Programming"
+  }
+]

@@ -1,0 +1,226 @@
+[
+  {
+    "type": "h2",
+    "content": "1.1   Getting Started"
+  },
+  {
+    "type": "p",
+    "content": "Computer science is a tremendously broad academic discipline. The areas of\nglobally distributed systems, artificial intelligence, robotics, graphics,\nsecurity, scientific computing, computer architecture, and dozens of emerging\nsub-fields all expand with new techniques and discoveries every year. The\nrapid progress of computer science has left few aspects of human life\nunaffected. Commerce, communication, science, art, leisure, and politics have\nall been reinvented as computational domains."
+  },
+  {
+    "type": "p",
+    "content": "The high productivity of computer science is only possible because the\ndiscipline is built upon an elegant and powerful set of fundamental ideas. All\ncomputing begins with representing information, specifying logic to process it,\nand designing abstractions that manage the complexity of that logic. Mastering\nthese fundamentals will require us to understand precisely how computers\ninterpret computer programs and carry out computational processes."
+  },
+  {
+    "type": "p",
+    "content": "These fundamental ideas have long been taught using the classic textbookStructure and Interpretation of Computer Programs(SICP) by Harold Abelson\nand Gerald Jay Sussman with Julie Sussman. This text borrows heavily from that\ntextbook, which the original authors have kindly licensed for adaptation and\nreuse under a Creative Commons license. These notes are published under theCreative Commons attribution non-commericial share-alike license version 3."
+  },
+  {
+    "type": "h3",
+    "content": "1.1.1   Programming in Python"
+  },
+  {
+    "type": "p",
+    "content": "A language isn't something you learn so much as something you join."
+  },
+  {
+    "type": "p",
+    "content": "—Arika Okrent"
+  },
+  {
+    "type": "p",
+    "content": "In order to define computational processes, we need a programming language;\npreferably one that many humans and a great variety of computers can all\nunderstand.  In this text, we will work primarily with thePythonlanguage."
+  },
+  {
+    "type": "p",
+    "content": "Python is a widely used programming language that has recruited enthusiasts from\nmany professions: web programmers, game engineers, scientists, academics, and\neven designers of new programming languages. When you learn Python, you join a\nmillion-person-strong community of developers. Developer communities are\ntremendously important institutions: members help each other solve problems,\nshare their projects and experiences, and collectively develop software and\ntools.  Dedicated members often achieve celebrity and widespread esteem for\ntheir contributions."
+  },
+  {
+    "type": "p",
+    "content": "The Python language itself is the product of alarge volunteer communitythat prides itself on thediversityof its contributors. The language\nwas conceived and first implemented byGuido van Rossumin the late 1980's.\nThe first chapter of hisPython 3 Tutorialexplains why Python is so\npopular, among the many languages available today."
+  },
+  {
+    "type": "p",
+    "content": "Python excels as an instructional language because, throughout its history,\nPython's developers have emphasized the human interpretability of Python code,\nreinforced by theZen of Pythonguiding principles of beauty, simplicity, and\nreadability. Python is particularly appropriate for this text because its broad\nset of features support a variety of different programming styles, which we will\nexplore. While there is no single way to program in Python, there are a set of\nconventions shared across the developer community that facilitate reading,\nunderstanding, and extending existing programs. Python's combination of great\nflexibility and accessibility allows students to explore many programming\nparadigms, and then apply their newly acquired knowledge to thousands ofongoing projects."
+  },
+  {
+    "type": "p",
+    "content": "These notes maintain the spirit ofSICPby introducing the features of Python\nin step with techniques for abstraction and a rigorous model of computation. In\naddition, these notes provide a practical introduction to Python programming,\nincluding some advanced language features and illustrative examples. Increasing\nyour facility with Python should come naturally as you progress through the\ntext."
+  },
+  {
+    "type": "p",
+    "content": "The best way to get started programming in Python is to interact with the\ninterpreter directly. This section describes how to install Python 3, initiate\nan interactive session with the interpreter, and start programming."
+  },
+  {
+    "type": "h3",
+    "content": "1.1.2   Installing Python 3"
+  },
+  {
+    "type": "p",
+    "content": "As with all great software, Python has many versions. This text will use the\nmost recent stable version of Python 3. Many computers have older versions of\nPython installed already, such as Python 2.7, but those will not match the\ndescriptions in this text. You should be able to use any computer, but expect to\ninstall Python 3. (Don't worry, Python is free.)"
+  },
+  {
+    "type": "p",
+    "content": "You can download Python 3 from thePython downloadspage by clicking on the\nversion that begins with 3 (not 2). Follow the instructions of the installer\nto complete installation."
+  },
+  {
+    "type": "p",
+    "content": "For further guidance, try these video tutorials onWindows installationandMac installationof Python 3, created by Julia Oh."
+  },
+  {
+    "type": "h3",
+    "content": "1.1.3   Interactive Sessions"
+  },
+  {
+    "type": "p",
+    "content": "In an interactive Python session, you type some Pythoncodeafter theprompt,>>>. The Pythoninterpreterreads and executes what you type,\ncarrying out your various commands."
+  },
+  {
+    "type": "p",
+    "content": "To start an interactive session, run the Python 3 application. Typepython3at a terminal prompt (Mac/Unix/Linux) or open the Python 3 application in\nWindows."
+  },
+  {
+    "type": "p",
+    "content": "If you see the Python prompt,>>>, then you have successfully started an\ninteractive session. These notes depict example interactions using the prompt,\nfollowed by some input."
+  },
+  {
+    "type": "code",
+    "content": ">>> 2 + 2\n4\n"
+  },
+  {
+    "type": "p",
+    "content": "Interactive controls.Each session keeps a history of what you have typed.\nTo access that history, press<Control>-P(previous) and<Control>-N(next).<Control>-Dexits a session, which discards this history. Up and\ndown arrows also cycle through history on some systems."
+  },
+  {
+    "type": "h3",
+    "content": "1.1.4   First Example"
+  },
+  {
+    "type": "p",
+    "content": "—William Shakespeare, A Midsummer-Night's Dream"
+  },
+  {
+    "type": "p",
+    "content": "To give Python a proper introduction, we will begin with an example that uses\nseveral language features.  In the next section, we will start from scratch and\nbuild up the language piece by piece. Think of this section as a sneak preview\nof features to come."
+  },
+  {
+    "type": "p",
+    "content": "Python has built-in support for a wide range of common programming activities,\nsuch as manipulating text, displaying graphics, and communicating over the\nInternet.  The line of Python code"
+  },
+  {
+    "type": "code",
+    "content": ">>> from urllib.request import urlopen\n"
+  },
+  {
+    "type": "p",
+    "content": "is animportstatement that loads functionality for accessing data on the\nInternet. In particular, it makes available a function calledurlopen, which\ncan access the content at a uniform resource locator (URL), a location of\nsomething on the Internet."
+  },
+  {
+    "type": "p",
+    "content": "Statements & Expressions. Python code consists of expressions and\nstatements. Broadly, computer programs consist of instructions to either"
+  },
+  {
+    "type": "p",
+    "content": "Statements typically describe actions. When the Python interpreter executes a\nstatement, it carries out the corresponding action. On the other hand,\nexpressions typically describe computations. When Python evaluates an\nexpression, it computes the value of that expression. This chapter introduces\nseveral types of statements and expressions."
+  },
+  {
+    "type": "p",
+    "content": "The assignment statement"
+  },
+  {
+    "type": "code",
+    "content": ">>> shakespeare = urlopen('http://composingprograms.com/shakespeare.txt')\n"
+  },
+  {
+    "type": "p",
+    "content": "associates the nameshakespearewith the value of the expression that\nfollows=.  That expression applies theurlopenfunction to a URL that\ncontains the complete text of William Shakespeare's 37 plays, all in a single\ntext document."
+  },
+  {
+    "type": "p",
+    "content": "Functions. Functions encapsulate logic that manipulates data.urlopenis a function.  A web address is a piece of data, and the text of Shakespeare's\nplays is another. The process by which the former leads to the latter may be\ncomplex, but we can apply that process using only a simple expression because\nthat complexity is tucked away within a function. Functions are the primary\ntopic of this chapter."
+  },
+  {
+    "type": "p",
+    "content": "Another assignment statement"
+  },
+  {
+    "type": "code",
+    "content": ">>> words = set(shakespeare.read().decode().split())\n"
+  },
+  {
+    "type": "p",
+    "content": "associates the namewordsto the set of all unique words that appear in\nShakespeare's plays, all 33,721 of them.  The chain of commands toread,decode, andsplit, each operate on an intermediate computational entity:\nwereadthe data from the opened URL, thendecodethe data into text,\nand finallysplitthe text into words.  All of those words are placed in aset."
+  },
+  {
+    "type": "p",
+    "content": "Objects. Asetis a type of object, one that supports set operations\nlike computing intersections and membership. An object seamlessly bundles\ntogether data and the logic that manipulates that data, in a way that manages\nthe complexity of both. Objects are the primary topic of Chapter 2.  Finally,\nthe expression"
+  },
+  {
+    "type": "code",
+    "content": ">>> {w for w in words if len(w) == 6 and w[::-1] in words}\n{'redder', 'drawer', 'reward', 'diaper', 'repaid'}\n"
+  },
+  {
+    "type": "p",
+    "content": "is a compound expression that evaluates to the set of all Shakespearian words\nthat are simultaneously a word spelled in reverse. The cryptic notationw[::-1]enumerates each letter in a word, but the-1dictates to step\nbackwards.  When you enter an expression in an interactive session, Python\nprints its value on the following line."
+  },
+  {
+    "type": "p",
+    "content": "Interpreters. Evaluating compound expressions requires a precise procedure\nthat interprets code in a predictable way. A program that implements such a\nprocedure, evaluating compound expressions, is called an interpreter. The\ndesign and implementation of interpreters is the primary topic of Chapter 3."
+  },
+  {
+    "type": "p",
+    "content": "When compared with other computer programs, interpreters for programming\nlanguages are unique in their generality. Python was not designed with\nShakespeare in mind. However, its great flexibility allowed us to process a\nlarge amount of text with only a few statements and expressions."
+  },
+  {
+    "type": "p",
+    "content": "In the end, we will find that all of these core concepts are closely related:\nfunctions are objects, objects are functions, and interpreters are instances of\nboth. However, developing a clear understanding of each of these concepts and\ntheir role in organizing code is critical to mastering the art of programming."
+  },
+  {
+    "type": "h3",
+    "content": "1.1.5   Errors"
+  },
+  {
+    "type": "p",
+    "content": "Python is waiting for your command.  You are encouraged to experiment with the\nlanguage, even though you may not yet know its full vocabulary and structure.\nHowever, be prepared for errors.  While computers are tremendously fast and\nflexible, they are also extremely rigid. The nature of computers is described inStanford's introductory courseas"
+  },
+  {
+    "type": "p",
+    "content": "The fundamental equation of computers is:"
+  },
+  {
+    "type": "p",
+    "content": "computer = powerful + stupid"
+  },
+  {
+    "type": "p",
+    "content": "Computers are very powerful, looking at volumes of data very quickly.\nComputers can perform billions of operations per second, where each operation\nis pretty simple."
+  },
+  {
+    "type": "p",
+    "content": "Computers are also shockingly stupid and fragile. The operations that they can\ndo are extremely rigid, simple, and mechanical. The computer lacks anything\nlike real insight ... it's nothing like the HAL 9000 from the movies. If\nnothing else, you should not be intimidated by the computer as if it's some\nsort of brain. It's very mechanical underneath it all."
+  },
+  {
+    "type": "p",
+    "content": "Programming is about a person using their real insight to build something\nuseful, constructed out of these teeny, simple little operations that the\ncomputer can do."
+  },
+  {
+    "type": "p",
+    "content": "—Francisco Cai and Nick Parlante, Stanford CS101"
+  },
+  {
+    "type": "p",
+    "content": "The rigidity of computers will immediately become apparent as you experiment\nwith the Python interpreter: even the smallest spelling and formatting changes\nwill cause unexpected output and errors."
+  },
+  {
+    "type": "p",
+    "content": "Learning to interpret errors and diagnose the cause of unexpected errors is\ncalleddebugging. Some guiding principles of debugging are:"
+  },
+  {
+    "type": "p",
+    "content": "Incremental testing, modular design, precise assumptions, and teamwork are\nthemes that persist throughout this text. Hopefully, they will also persist\nthroughout your computer science career."
+  },
+  {
+    "type": "p",
+    "content": "Continue:1.2 Elements of Programming"
+  }
+]

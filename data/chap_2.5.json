@@ -1,0 +1,534 @@
+[
+  {
+    "type": "h2",
+    "content": "2.5   Object-Oriented Programming"
+  },
+  {
+    "type": "p",
+    "content": "Object-oriented programming (OOP) is a method for organizing programs that\nbrings together many of the ideas introduced in this chapter. Like the\nfunctions in data abstraction, classes create abstraction barriers between the\nuse and implementation of data. Like dispatch dictionaries, objects\nrespond to behavioral requests. Like mutable data structures, objects have\nlocal state that is not directly accessible from the global environment.\nThe Python object system provides convenient syntax to promote the use of these\ntechniques for organizing programs. Much of this syntax is shared among other\nobject-oriented programming languages."
+  },
+  {
+    "type": "p",
+    "content": "The object system offers more than just convenience. It enables a new metaphor\nfor designing programs in which several independent agents interact within the\ncomputer. Each object bundles together local state and behavior in a\nway that abstracts the complexity of both. Objects communicate with each other,\nand useful results are computed as a consequence of their interaction.  Not\nonly do objects pass messages, they also share behavior among other objects of\nthe same type and inherit characteristics from related types."
+  },
+  {
+    "type": "p",
+    "content": "The paradigm of object-oriented programming has its own vocabulary that\nsupports the object metaphor.  We have seen that an object is a data value\nthat has methods and attributes, accessible via dot notation. Every object also\nhas a type, called itsclass.  To create new types of data, we implement new\nclasses."
+  },
+  {
+    "type": "h3",
+    "content": "2.5.1   Objects and Classes"
+  },
+  {
+    "type": "p",
+    "content": "A class serves as a template for all objects whose type is that class. Every\nobject is an instance of some particular class.  The objects we have used so\nfar all have built-in classes, but new user-defined classes can be created as\nwell. A class definition specifies the attributes and methods shared among\nobjects of that class.  We will introduce the class statement by revisiting the\nexample of a bank account."
+  },
+  {
+    "type": "p",
+    "content": "When introducing local state, we saw that bank accounts are naturally modeled\nas mutable values that have abalance.  A bank account object should have awithdrawmethod that updates the account balance and returns the requested\namount, if it is available.  To complete the abstraction: a bank account should\nbe able to return its currentbalance, return the name of the accountholder, and an amount fordeposit."
+  },
+  {
+    "type": "p",
+    "content": "AnAccountclass allows us to create multiple instances of bank accounts.\nThe act of creating a new object instance is known asinstantiatingthe\nclass. The syntax in Python for instantiating a class is identical to the\nsyntax of calling a function.  In this case, we callAccountwith the\nargument'Kirk', the account holder's name."
+  },
+  {
+    "type": "code",
+    "content": ">>> a = Account('Kirk')\n"
+  },
+  {
+    "type": "p",
+    "content": "Anattributeof an object is a name-value pair associated with the object,\nwhich is accessible via dot notation.  The attributes specific to a particular\nobject, as opposed to all objects of a class, are calledinstance attributes.\nEachAccounthas its own balance and account holder name, which are examples\nof instance attributes. In the broader programming community, instance\nattributes may also be calledfields,properties, orinstance variables."
+  },
+  {
+    "type": "code",
+    "content": ">>> a.holder\n'Kirk'\n>>> a.balance\n0\n"
+  },
+  {
+    "type": "p",
+    "content": "Functions that operate on the object or perform object-specific computations are\ncalled methods. The return values and side effects of a method can depend upon\nand change other attributes of the object.  For example,depositis a\nmethod of ourAccountobjecta. It takes one argument, the amount to\ndeposit, changes thebalanceattribute of the object, and returns the\nresulting balance."
+  },
+  {
+    "type": "code",
+    "content": ">>> a.deposit(15)\n15\n"
+  },
+  {
+    "type": "p",
+    "content": "We say that methods areinvokedon a particular object.  As a result\nof invoking thewithdrawmethod, either the withdrawal is approved and the\namount is deducted, or the request is declined and the method returns an error\nmessage."
+  },
+  {
+    "type": "code",
+    "content": ">>> a.withdraw(10)  # The withdraw method returns the balance after withdrawal\n5\n>>> a.balance       # The balance attribute has changed\n5\n>>> a.withdraw(10)\n'Insufficient funds'\n"
+  },
+  {
+    "type": "p",
+    "content": "As illustrated above, the behavior of a method can depend upon the changing\nattributes of the object.  Two calls towithdrawwith the same argument\nreturn different results."
+  },
+  {
+    "type": "h3",
+    "content": "2.5.2   Defining Classes"
+  },
+  {
+    "type": "p",
+    "content": "User-defined classes are created byclassstatements, which consist of a\nsingle clause.   A class statement defines the class name, then includes a suite\nof statements to define the attributes of the class:"
+  },
+  {
+    "type": "p",
+    "content": "When a class statement is executed, a new class is created and bound to<name>in the first frame of the current environment.  The suite is then\nexecuted.  Any names bound within the<suite>of aclassstatement,\nthroughdefor assignment statements, create or modify attributes of the\nclass."
+  },
+  {
+    "type": "p",
+    "content": "Classes are typically organized around manipulating instance attributes, which\nare the name-value pairs associated with each instance of that class.  The\nclass specifies the instance attributes of its objects by defining a method for\ninitializing new objects.  For example, part of initializing an object of theAccountclass is to assign it a starting balance of 0."
+  },
+  {
+    "type": "p",
+    "content": "The<suite>of aclassstatement containsdefstatements that define\nnew methods for objects of that class.  The method that initializes objects has\na special name in Python,__init__(two underscores on each side of the\nword \"init\"), and is called theconstructorfor the class."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Account:\n        def __init__(self, account_holder):\n            self.balance = 0\n            self.holder = account_holder\n"
+  },
+  {
+    "type": "p",
+    "content": "The__init__method forAccounthas two formal parameters.  The first\none,self, is bound to the newly createdAccountobject. The second\nparameter,account_holder, is bound to the argument passed to the class\nwhen it is called to be instantiated."
+  },
+  {
+    "type": "p",
+    "content": "The constructor binds the instance attribute namebalanceto 0.  It also\nbinds the attribute nameholderto the value of the nameaccount_holder. The formal parameteraccount_holderis a local name in\nthe__init__method.  On the other hand, the nameholderthat is bound\nvia the final assignment statement persists, because it is stored as an\nattribute ofselfusing dot notation."
+  },
+  {
+    "type": "p",
+    "content": "Having defined theAccountclass, we can instantiate it."
+  },
+  {
+    "type": "code",
+    "content": ">>> a = Account('Kirk')\n"
+  },
+  {
+    "type": "p",
+    "content": "This \"call\" to theAccountclass creates a new object that is an instance ofAccount, then calls the constructor function__init__with two\narguments: the newly created object and the string'Kirk'.  By convention, we\nuse the parameter nameselffor the first argument of a constructor, because\nit is bound to the object being instantiated.  This convention is adopted in\nvirtually all Python code."
+  },
+  {
+    "type": "p",
+    "content": "Now, we can access the object'sbalanceandholderusing dot notation."
+  },
+  {
+    "type": "code",
+    "content": ">>> a.balance\n0\n>>> a.holder\n'Kirk'\n"
+  },
+  {
+    "type": "p",
+    "content": "Identity.Each new account instance has its own balance attribute, the\nvalue of which is independent of other objects of the same class."
+  },
+  {
+    "type": "code",
+    "content": ">>> b = Account('Spock')\n>>> b.balance = 200\n>>> [acc.balance for acc in (a, b)]\n[0, 200]\n"
+  },
+  {
+    "type": "p",
+    "content": "To enforce this separation, every object that is an instance of a user-defined\nclass has a unique identity.  Object identity is compared using theisandis notoperators."
+  },
+  {
+    "type": "code",
+    "content": ">>> a is a\nTrue\n>>> a is not b\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "Despite being constructed from identical calls, the objects bound toaandbare not the same.  As usual, binding an object to a new name using\nassignment does not create a new object."
+  },
+  {
+    "type": "code",
+    "content": ">>> c = a\n>>> c is a\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "New objects that have user-defined classes are only created when a class (such\nasAccount) is instantiated with call expression syntax."
+  },
+  {
+    "type": "p",
+    "content": "Methods.Object methods are also defined by adefstatement in the suite\nof aclassstatement.  Below,depositandwithdraware both defined\nas methods on objects of theAccountclass."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Account:\n        def __init__(self, account_holder):\n            self.balance = 0\n            self.holder = account_holder\n        def deposit(self, amount):\n            self.balance = self.balance + amount\n            return self.balance\n        def withdraw(self, amount):\n            if amount > self.balance:\n                return 'Insufficient funds'\n            self.balance = self.balance - amount\n            return self.balance\n"
+  },
+  {
+    "type": "p",
+    "content": "While method definitions do not differ from function definitions in how they\nare declared, method definitions do have a different effect when executed.  The\nfunction value that is created by adefstatement within aclassstatement is bound to the declared name, but bound locally within the class as\nan attribute. That value is invoked as a method using dot notation from an\ninstance of the class."
+  },
+  {
+    "type": "p",
+    "content": "Each method definition again includes a special first parameterself,\nwhich is bound to the object on which the method is invoked.  For example,\nlet us say thatdepositis invoked on a particularAccountobject and\npassed a single argument value: the amount deposited.  The object itself is\nbound toself, while the argument is bound toamount.  All invoked\nmethods have access to the object via theselfparameter, and so they can\nall access and manipulate the object's state."
+  },
+  {
+    "type": "p",
+    "content": "To invoke these methods, we again use dot notation, as illustrated below."
+  },
+  {
+    "type": "code",
+    "content": ">>> spock_account = Account('Spock')\n>>> spock_account.deposit(100)\n100\n>>> spock_account.withdraw(90)\n10\n>>> spock_account.withdraw(90)\n'Insufficient funds'\n>>> spock_account.holder\n'Spock'\n"
+  },
+  {
+    "type": "p",
+    "content": "When a method is invoked via dot notation, the object itself (bound tospock_account, in this case) plays a dual role.  First, it determines what the\nnamewithdrawmeans;withdrawis not a name in the environment, but\ninstead a name that is local to theAccountclass.  Second, it is bound to\nthe first parameterselfwhen thewithdrawmethod is invoked."
+  },
+  {
+    "type": "h3",
+    "content": "2.5.3   Message Passing and Dot Expressions"
+  },
+  {
+    "type": "p",
+    "content": "Methods, which are defined in classes, and instance attributes, which are\ntypically assigned in constructors, are the fundamental elements of\nobject-oriented programming.  These two concepts replicate much of the\nbehavior of a dispatch dictionary in a message passing implementation of a data\nvalue.  Objects take messages using dot notation, but instead of those messages\nbeing arbitrary string-valued keys, they are names local to a class.  Objects\nalso have named local state values (the instance attributes), but that state\ncan be accessed and manipulated using dot notation, without having to employnonlocalstatements in the implementation."
+  },
+  {
+    "type": "p",
+    "content": "The central idea in message passing was that data values should have behavior by\nresponding to messages that are relevant to the abstract type they represent.\nDot notation is a syntactic feature of Python that formalizes the message\npassing metaphor. The advantage of using a language with a built-in object\nsystem is that message passing can interact seamlessly with other language\nfeatures, such as assignment statements.  We do not require different messages\nto \"get\" or \"set\" the value associated with a local attribute name; the\nlanguage syntax allows us to use the message name directly."
+  },
+  {
+    "type": "p",
+    "content": "Dot expressions.The code fragmentspock_account.depositis called adot\nexpression. A dot expression consists of an expression, a dot, and a name:"
+  },
+  {
+    "type": "p",
+    "content": "The<expression>can be any valid Python expression, but the<name>must\nbe a simple name (not an expression that evaluates to a name).  A dot expression\nevaluates to the value of the attribute with the given<name>, for the\nobject that is the value of the<expression>."
+  },
+  {
+    "type": "p",
+    "content": "The built-in functiongetattralso returns an attribute for an object by\nname.  It is the function equivalent of dot notation.  Usinggetattr, we can\nlook up an attribute using a string, just as we did with a dispatch dictionary."
+  },
+  {
+    "type": "code",
+    "content": ">>> getattr(spock_account, 'balance')\n10\n"
+  },
+  {
+    "type": "p",
+    "content": "We can also test whether an object has a named attribute withhasattr."
+  },
+  {
+    "type": "code",
+    "content": ">>> hasattr(spock_account, 'deposit')\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "The attributes of an object include all of its instance attributes, along with\nall of the attributes (including methods) defined in its class.  Methods are\nattributes of the class that require special handling."
+  },
+  {
+    "type": "p",
+    "content": "Methods and functions.When a method is invoked on an object, that object is\nimplicitly passed as the first argument to the method. That is, the object that\nis the value of the<expression>to the left of the dot is passed\nautomatically as the first argument to the method named on the right side of the\ndot expression.  As a result, the object is bound to the parameterself."
+  },
+  {
+    "type": "p",
+    "content": "To achieve automaticselfbinding, Python distinguishes betweenfunctions, which we have been creating since the beginning of the text, andbound methods, which couple together a function and the object on which\nthat method will be invoked. A bound method value is already associated with its\nfirst argument, the instance on which it was invoked, which will be namedselfwhen the method is called."
+  },
+  {
+    "type": "p",
+    "content": "We can see the difference in the interactive interpreter by callingtypeon\nthe returned values of dot expressions.  As an attribute of a class, a method\nis just a function, but as an attribute of an instance, it is a bound method:"
+  },
+  {
+    "type": "code",
+    "content": ">>> type(Account.deposit)\n<class 'function'>\n>>> type(spock_account.deposit)\n<class 'method'>\n"
+  },
+  {
+    "type": "p",
+    "content": "These two results differ only in the fact that the first is a standard\ntwo-argument function with parametersselfandamount. The second\nis a one-argument method, where the nameselfwill be bound to the object\nnamedspock_accountautomatically when the method is called, while the\nparameteramountwill be bound to the argument passed to the method. Both of\nthese values, whether function values or bound method values, are associated\nwith the samedepositfunction body."
+  },
+  {
+    "type": "p",
+    "content": "We can calldepositin two ways: as a function and as a bound method.  In\nthe former case, we must supply an argument for theselfparameter\nexplicitly.  In the latter case, theselfparameter is bound automatically."
+  },
+  {
+    "type": "code",
+    "content": ">>> Account.deposit(spock_account, 1001)  # The deposit function takes 2 arguments\n1011\n>>> spock_account.deposit(1000)           # The deposit method takes 1 argument\n2011\n"
+  },
+  {
+    "type": "p",
+    "content": "The functiongetattrbehaves exactly like dot notation: if its first\nargument is an object but the name is a method defined in the class, thengetattrreturns a bound method value.  On the other hand, if the first\nargument is a class, thengetattrreturns the attribute value directly,\nwhich is a plain function."
+  },
+  {
+    "type": "p",
+    "content": "Naming Conventions.Class names are conventionally written using the\nCapWords convention (also called CamelCase because the capital letters in the\nmiddle of a name look like humps).  Method names follow the standard convention\nof naming functions using lowercased words separated by underscores."
+  },
+  {
+    "type": "p",
+    "content": "In some cases, there are instance variables and methods that are related to the\nmaintenance and consistency of an object that we don't want users of the object\nto see or use.  They are not part of the abstraction defined by a class, but\ninstead part of the implementation.  Python's convention dictates that if an\nattribute name starts with an underscore, it should only be accessed within\nmethods of the class itself, rather than by users of the class."
+  },
+  {
+    "type": "h3",
+    "content": "2.5.4   Class Attributes"
+  },
+  {
+    "type": "p",
+    "content": "Some attribute values are shared across all objects of a given class. Such\nattributes are associated with the class itself, rather than any individual\ninstance of the class. For instance, let us say that a bank pays interest on the\nbalance of accounts at a fixed interest rate. That interest rate may change, but\nit is a single value shared across all accounts."
+  },
+  {
+    "type": "p",
+    "content": "Class attributes are created by assignment statements in the suite of aclassstatement, outside of any method definition. In the broader developer\ncommunity, class attributes may also be called class variables or static\nvariables. The following class statement creates a class attribute forAccountwith the nameinterest."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Account:\n        interest = 0.02            # A class attribute\n        def __init__(self, account_holder):\n            self.balance = 0\n            self.holder = account_holder\n        # Additional methods would be defined here\n"
+  },
+  {
+    "type": "p",
+    "content": "This attribute can still be accessed from any instance of the class."
+  },
+  {
+    "type": "code",
+    "content": ">>> spock_account = Account('Spock')\n>>> kirk_account = Account('Kirk')\n>>> spock_account.interest\n0.02\n>>> kirk_account.interest\n0.02\n"
+  },
+  {
+    "type": "p",
+    "content": "However, a single assignment statement to a class attribute changes the value of\nthe attribute for all instances of the class."
+  },
+  {
+    "type": "code",
+    "content": ">>> Account.interest = 0.04\n>>> spock_account.interest\n0.04\n>>> kirk_account.interest\n0.04\n"
+  },
+  {
+    "type": "p",
+    "content": "Attribute names.We have introduced enough complexity into our object system\nthat we have to specify how names are resolved to particular attributes.  After\nall, we could easily have a class attribute and an instance attribute with the\nsame name."
+  },
+  {
+    "type": "p",
+    "content": "As we have seen, a dot expression consists of an expression, a dot, and a name:"
+  },
+  {
+    "type": "p",
+    "content": "To evaluate a dot expression:"
+  },
+  {
+    "type": "p",
+    "content": "In this evaluation procedure, instance attributes are found before class\nattributes, just as local names have priority over global in an environment.\nMethods defined within the class are combined with the object of the dot\nexpression to form a bound method during the fourth step of this evaluation\nprocedure.  The procedure for looking up a name in a class has additional\nnuances that will arise shortly, once we introduce class inheritance."
+  },
+  {
+    "type": "p",
+    "content": "Attribute assignment.All assignment statements that contain a dot\nexpression on their left-hand side affect attributes for the object of that dot\nexpression.  If the object is an instance, then assignment sets an instance\nattribute.  If the object is a class, then assignment sets a class attribute.\nAs a consequence of this rule, assignment to an attribute of an object cannot\naffect the attributes of its class.  The examples below illustrate this\ndistinction."
+  },
+  {
+    "type": "p",
+    "content": "If we assign to the named attributeinterestof an account instance, we\ncreate a new instance attribute that has the same name as the existing class\nattribute."
+  },
+  {
+    "type": "code",
+    "content": ">>> kirk_account.interest = 0.08\n"
+  },
+  {
+    "type": "p",
+    "content": "and that attribute value will be returned from a dot expression."
+  },
+  {
+    "type": "code",
+    "content": ">>> kirk_account.interest\n0.08\n"
+  },
+  {
+    "type": "p",
+    "content": "However, the class attributeintereststill retains its original value,\nwhich is returned for all other accounts."
+  },
+  {
+    "type": "code",
+    "content": ">>> spock_account.interest\n0.04\n"
+  },
+  {
+    "type": "p",
+    "content": "Changes to the class attributeinterestwill affectspock_account, but the\ninstance attribute forkirk_accountwill be unaffected."
+  },
+  {
+    "type": "code",
+    "content": ">>> Account.interest = 0.05  # changing the class attribute\n>>> spock_account.interest     # changes instances without like-named instance attributes\n0.05\n>>> kirk_account.interest     # but the existing instance attribute is unaffected\n0.08\n"
+  },
+  {
+    "type": "h3",
+    "content": "2.5.5   Inheritance"
+  },
+  {
+    "type": "p",
+    "content": "When working in the object-oriented programming paradigm, we often find that\ndifferent types are related.  In particular, we find that similar classes differ\nin their amount of specialization. Two classes may have similar attributes, but\none represents a special case of the other."
+  },
+  {
+    "type": "p",
+    "content": "For example, we may want to implement a checking account, which is different\nfrom a standard account. A checking account charges an extra $1 for each\nwithdrawal and has a lower interest rate.  Here, we demonstrate the desired\nbehavior."
+  },
+  {
+    "type": "code",
+    "content": ">>> ch = CheckingAccount('Spock')\n>>> ch.interest     # Lower interest rate for checking accounts\n0.01\n>>> ch.deposit(20)  # Deposits are the same\n20\n>>> ch.withdraw(5)  # withdrawals decrease balance by an extra charge\n14\n"
+  },
+  {
+    "type": "p",
+    "content": "ACheckingAccountis a specialization of anAccount.  In OOP\nterminology, the generic account will serve as the base class ofCheckingAccount, whileCheckingAccountwill be a subclass ofAccount.  (The termsparent classandsuperclassare also used for the\nbase class, whilechild classis also used for the subclass.)"
+  },
+  {
+    "type": "p",
+    "content": "A subclassinheritsthe attributes of its base class, but mayoverridecertain attributes, including certain methods. With inheritance, we only specify\nwhat is different between the subclass and the base class. Anything that we\nleave unspecified in the subclass is automatically assumed to behave just as it\nwould for the base class."
+  },
+  {
+    "type": "p",
+    "content": "Inheritance also has a role in our object metaphor, in addition to being a\nuseful organizational feature.  Inheritance is meant to representis-arelationships between classes, which contrast withhas-arelationships.  A\nchecking accountis-aspecific type of account, so having aCheckingAccountinherit fromAccountis an appropriate use of\ninheritance. On the other hand, a bankhas-alist of bank accounts that it\nmanages, so neither should inherit from the other.  Instead, a list of account\nobjects would be naturally expressed as an instance attribute of a bank object."
+  },
+  {
+    "type": "h3",
+    "content": "2.5.6   Using Inheritance"
+  },
+  {
+    "type": "p",
+    "content": "First, we give a full implementation of theAccountclass, which\nincludes docstrings for the class and its methods."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Account:\n        \"\"\"A bank account that has a non-negative balance.\"\"\"\n        interest = 0.02\n        def __init__(self, account_holder):\n            self.balance = 0\n            self.holder = account_holder\n        def deposit(self, amount):\n            \"\"\"Increase the account balance by amount and return the new balance.\"\"\"\n            self.balance = self.balance + amount\n            return self.balance\n        def withdraw(self, amount):\n            \"\"\"Decrease the account balance by amount and return the new balance.\"\"\"\n            if amount > self.balance:\n                return 'Insufficient funds'\n            self.balance = self.balance - amount\n            return self.balance\n"
+  },
+  {
+    "type": "p",
+    "content": "A full implementation ofCheckingAccountappears below. We specify\ninheritance by placing an expression that evaluates to the base class in\nparentheses after the class name."
+  },
+  {
+    "type": "code",
+    "content": ">>> class CheckingAccount(Account):\n        \"\"\"A bank account that charges for withdrawals.\"\"\"\n        withdraw_charge = 1\n        interest = 0.01\n        def withdraw(self, amount):\n            return Account.withdraw(self, amount + self.withdraw_charge)\n"
+  },
+  {
+    "type": "p",
+    "content": "Here, we introduce a class attributewithdraw_chargethat is specific to theCheckingAccountclass. We assign a lower value to theinterestattribute.  We also define a newwithdrawmethod to override the behavior\ndefined in theAccountclass. With no further statements in the class suite,\nall other behavior is inherited from the base classAccount."
+  },
+  {
+    "type": "code",
+    "content": ">>> checking = CheckingAccount('Sam')\n>>> checking.deposit(10)\n10\n>>> checking.withdraw(5)\n4\n>>> checking.interest\n0.01\n"
+  },
+  {
+    "type": "p",
+    "content": "The expressionchecking.depositevaluates to a bound method for making\ndeposits, which was defined in theAccountclass. When Python\nresolves a name in a dot expression that is not an attribute of the instance, it\nlooks up the name in the class.  In fact, the act of \"looking up\" a name in a\nclass tries to find that name in every base class in the inheritance chain for\nthe original object's class.  We can define this procedure recursively.  To look\nup a name in a class."
+  },
+  {
+    "type": "p",
+    "content": "In the case ofdeposit, Python would have looked for the name first on the\ninstance, and then in theCheckingAccountclass.  Finally, it would look in\ntheAccountclass, wheredepositis defined. According to our evaluation\nrule for dot expressions, sincedepositis a function looked up in the class\nfor thecheckinginstance, the dot expression evaluates to a bound method\nvalue.  That method is invoked with the argument 10, which calls the deposit\nmethod withselfbound to thecheckingobject andamountbound to\n10."
+  },
+  {
+    "type": "p",
+    "content": "The class of an object stays constant throughout.  Even though thedepositmethod was found in theAccountclass,depositis called withselfbound to an instance ofCheckingAccount, not ofAccount."
+  },
+  {
+    "type": "p",
+    "content": "Calling ancestors.Attributes that have been overridden are still\naccessible via class objects.  For instance, we implemented\nthewithdrawmethod ofCheckingAccountby calling thewithdrawmethod ofAccountwith an argument that included thewithdraw_charge."
+  },
+  {
+    "type": "p",
+    "content": "Notice that we calledself.withdraw_chargerather than the equivalentCheckingAccount.withdraw_charge.  The benefit of the former over the latter\nis that a class that inherits fromCheckingAccountmight override the\nwithdrawal charge.  If that is the case, we would like our implementation ofwithdrawto find that new value instead of the old one."
+  },
+  {
+    "type": "p",
+    "content": "Interfaces.It is extremely common in object-oriented programs that\ndifferent types of objects will share the same attribute names. Anobject\ninterfaceis a collection of attributes and conditions on those attributes.\nFor example, all accounts must havedepositandwithdrawmethods that\ntake numerical arguments, as well as abalanceattribute. The classesAccountandCheckingAccountboth implement this interface. Inheritance\nspecifically promotes name sharing in this way. In some programming languages\nsuch as Java, interface implementations must be explicitly declared.  In others\nsuch as Python, Ruby, and Go, any object with the appropriate names implements\nan interface."
+  },
+  {
+    "type": "p",
+    "content": "The parts of your program that use objects (rather than implementing them) are\nmost robust to future changes if they do not make assumptions about object\ntypes, but instead only about their attribute names. That is, they use the\nobject abstraction, rather than assuming anything about its implementation."
+  },
+  {
+    "type": "p",
+    "content": "For example, let us say that we run a lottery, and we wish to deposit $5 into\neach of a list of accounts.  The following implementation does not assume\nanything about the types of those accounts, and therefore works equally well\nwith any type of object that has adepositmethod:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def deposit_all(winners, amount=5):\n        for account in winners:\n            account.deposit(amount)\n"
+  },
+  {
+    "type": "p",
+    "content": "The functiondeposit_allabove assumes only that eachaccountsatisfies\nthe account object abstraction, and so it will work with any other account\nclasses that also implement this interface.  Assuming a particular class of\naccount would violate the abstraction barrier of the account object\nabstraction. For example, the following implementation will not necessarily\nwork with new kinds of accounts:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def deposit_all(winners, amount=5):\n        for account in winners:\n            Account.deposit(account, amount)\n"
+  },
+  {
+    "type": "p",
+    "content": "We will address this topic in more detail later in the chapter."
+  },
+  {
+    "type": "h3",
+    "content": "2.5.7   Multiple Inheritance"
+  },
+  {
+    "type": "p",
+    "content": "Python supports the concept of a subclass inheriting attributes from multiple\nbase classes, a language feature calledmultiple inheritance."
+  },
+  {
+    "type": "p",
+    "content": "Suppose that we have aSavingsAccountthat inherits fromAccount, but\ncharges customers a small fee every time they make a deposit."
+  },
+  {
+    "type": "code",
+    "content": ">>> class SavingsAccount(Account):\n        deposit_charge = 2\n        def deposit(self, amount):\n            return Account.deposit(self, amount - self.deposit_charge)\n"
+  },
+  {
+    "type": "p",
+    "content": "Then, a clever executive conceives of anAsSeenOnTVAccountaccount with the\nbest features of bothCheckingAccountandSavingsAccount: withdrawal\nfees, deposit fees, and a low interest rate. It's both a checking and a savings\naccount in one! \"If we build it,\" the executive reasons, \"someone will sign up\nand pay all those fees.  We'll even give them a dollar.\""
+  },
+  {
+    "type": "code",
+    "content": ">>> class AsSeenOnTVAccount(CheckingAccount, SavingsAccount):\n        def __init__(self, account_holder):\n            self.holder = account_holder\n            self.balance = 1           # A free dollar!\n"
+  },
+  {
+    "type": "p",
+    "content": "In fact, this implementation is complete.  Both withdrawal and deposits will\ngenerate fees, using the function definitions inCheckingAccountandSavingsAccountrespectively."
+  },
+  {
+    "type": "code",
+    "content": ">>> such_a_deal = AsSeenOnTVAccount(\"John\")\n>>> such_a_deal.balance\n1\n>>> such_a_deal.deposit(20)            # $2 fee from SavingsAccount.deposit\n19\n>>> such_a_deal.withdraw(5)            # $1 fee from CheckingAccount.withdraw\n13\n"
+  },
+  {
+    "type": "p",
+    "content": "Non-ambiguous references are resolved correctly as expected:"
+  },
+  {
+    "type": "code",
+    "content": ">>> such_a_deal.deposit_charge\n2\n>>> such_a_deal.withdraw_charge\n1\n"
+  },
+  {
+    "type": "p",
+    "content": "But what about when the reference is ambiguous, such as the reference to thewithdrawmethod that is defined in bothAccountandCheckingAccount?\nThe figure below depicts aninheritance graphfor theAsSeenOnTVAccountclass.  Each arrow points from a subclass to a base class."
+  },
+  {
+    "type": "p",
+    "content": "For a simple \"diamond\" shape like this, Python resolves names from left to\nright, then upwards.  In this example, Python checks for an attribute name in\nthe following classes, in order, until an attribute with that name is found:"
+  },
+  {
+    "type": "p",
+    "content": "There is no correct solution to the inheritance ordering problem, as there are\ncases in which we might prefer to give precedence to certain inherited classes\nover others.  However, any programming language that supports multiple\ninheritance must select some ordering in a consistent way, so that users of the\nlanguage can predict the behavior of their programs."
+  },
+  {
+    "type": "p",
+    "content": "Further reading.Python resolves this name using a recursive algorithm\ncalled the C3 Method Resolution Ordering.  The method resolution order of any\nclass can be queried using themromethod on all classes."
+  },
+  {
+    "type": "code",
+    "content": ">>> [c.__name__ for c in AsSeenOnTVAccount.mro()]\n['AsSeenOnTVAccount', 'CheckingAccount', 'SavingsAccount', 'Account', 'object']\n"
+  },
+  {
+    "type": "p",
+    "content": "The precise algorithm for finding method resolution orderings is not a topic for\nthis text, but isdescribed by Python's primary authorwith\na reference to the original paper."
+  },
+  {
+    "type": "h3",
+    "content": "2.5.8   The Role of Objects"
+  },
+  {
+    "type": "p",
+    "content": "The Python object system is designed to make data abstraction and message\npassing both convenient and flexible.  The specialized syntax of classes,\nmethods, inheritance, and dot expressions all enable us to formalize the object\nmetaphor in our programs, which improves our ability to organize large programs."
+  },
+  {
+    "type": "p",
+    "content": "In particular, we would like our object system to promote aseparation of\nconcernsamong the different aspects of the program.  Each object in a program\nencapsulates and manages some part of the program's state, and each class\nstatement defines the functions that implement some part of the program's\noverall logic.  Abstraction barriers enforce the boundaries between different\naspects of a large program."
+  },
+  {
+    "type": "p",
+    "content": "Object-oriented programming is particularly well-suited to programs that model\nsystems that have separate but interacting parts.  For instance, different users\ninteract in a social network, different characters interact in a game, and\ndifferent shapes interact in a physical simulation. When representing such\nsystems, the objects in a program often map naturally onto objects in the system\nbeing modeled, and classes represent their types and relationships."
+  },
+  {
+    "type": "p",
+    "content": "On the other hand, classes may not provide the best mechanism for implementing\ncertain abstractions.  Functional abstractions provide a more natural metaphor\nfor representing relationships between inputs and outputs. One should not feel\ncompelled to fit every bit of logic in a program within a class, especially when\ndefining independent functions for manipulating data is more natural.  Functions\ncan also enforce a separation of concerns."
+  },
+  {
+    "type": "p",
+    "content": "Multi-paradigm languages such as Python allow programmers to match\norganizational paradigms to appropriate problems. Learning to identify when to\nintroduce a new class, as opposed to a new function, in order to simplify or\nmodularize a program, is an important design skill in software engineering that\ndeserves careful attention."
+  },
+  {
+    "type": "p",
+    "content": "Continue:2.6 Implementing Classes and Objects"
+  }
+]

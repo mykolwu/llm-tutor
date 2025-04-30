@@ -1,0 +1,302 @@
+[
+  {
+    "type": "h2",
+    "content": "2.8   Efficiency"
+  },
+  {
+    "type": "p",
+    "content": "Decisions of how to represent and process data are often influenced by the\nefficiency of alternatives. Efficiency refers to the computational resources\nused by a representation or process, such as how much time and memory are\nrequired to compute the result of a function or represent an object. These\namounts can vary widely depending on the details of an implementation."
+  },
+  {
+    "type": "h3",
+    "content": "2.8.1   Measuring Efficiency"
+  },
+  {
+    "type": "p",
+    "content": "Measuring exactly how long a program requires to run or how much memory it\nconsumes is challenging, because the results depend upon many details of how a\ncomputer is configured. A more reliable way to characterize the efficiency of a\nprogram is to measure how many times some event occurs, such as a function\ncall."
+  },
+  {
+    "type": "p",
+    "content": "Let's return to our first tree-recursive function, thefibfunction for\ncomputing numbers in the Fibonacci sequence."
+  },
+  {
+    "type": "code",
+    "content": ">>> def fib(n):\n        if n == 0:\n            return 0\n        if n == 1:\n            return 1\n        return fib(n-2) + fib(n-1)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> fib(5)\n5\n"
+  },
+  {
+    "type": "p",
+    "content": "Consider the pattern of computation that results from evaluatingfib(6),\ndepicted below.  To computefib(5), we computefib(3)andfib(4).\nTo computefib(3), we computefib(1)andfib(2).  In general, the\nevolved process looks like a tree. Each blue dot indicates a completed\ncomputation of a Fibonacci number in the traversal of this tree."
+  },
+  {
+    "type": "p",
+    "content": "This function is instructive as a prototypical tree recursion, but it is a\nterribly inefficient way to compute Fibonacci numbers because it does so much\nredundant computation. The entire computation offib(3)is duplicated."
+  },
+  {
+    "type": "p",
+    "content": "We can measure this inefficiency. The higher-ordercountfunction returns\nan equivalent function to its argument that also maintains acall_countattribute. In this way, we can inspect just how many timesfibis called."
+  },
+  {
+    "type": "code",
+    "content": ">>> def count(f):\n        def counted(*args):\n            counted.call_count += 1\n            return f(*args)\n        counted.call_count = 0\n        return counted\n"
+  },
+  {
+    "type": "p",
+    "content": "By counting the number of calls tofib, we see that the calls required\ngrows faster than the Fibonacci numbers themselves. This rapid expansion of\ncalls is characteristic of tree-recursive functions."
+  },
+  {
+    "type": "code",
+    "content": ">>> fib = count(fib)\n>>> fib(19)\n4181\n>>> fib.call_count\n13529\n"
+  },
+  {
+    "type": "p",
+    "content": "Space.To understand the space requirements of a function, we must specify\ngenerally how memory is used, preserved, and reclaimed in our environment model\nof computation. In evaluating an expression, the interpreter preserves allactiveenvironments and all values and frames referenced by those\nenvironments.  An environment is active if it provides the evaluation context\nfor some expression being evaluated. An environment becomes inactive whenever\nthe function call for which its first frame was created finally returns."
+  },
+  {
+    "type": "p",
+    "content": "For example, when evaluatingfib, the interpreter proceeds to compute each\nvalue in the order shown previously, traversing the structure of the tree.  To\ndo so, it only needs to keep track of those nodes that are above the current\nnode in the tree at any point in the computation. The memory used to evaluate\nthe rest of the branches can be reclaimed because it cannot affect future\ncomputation. In general, the space required for tree-recursive functions will\nbe proportional to the maximum depth of the tree."
+  },
+  {
+    "type": "p",
+    "content": "The diagram below depicts the environment created by evaluatingfib(3).  In\nthe process of evaluating the return expression for the initial application offib, the expressionfib(n-2)is evaluated, yielding a value of 0.\nOnce this value is computed, the corresponding environment frame (grayed out)\nis no longer needed: it is not part of an active environment. Thus, a\nwell-designed interpreter can reclaim the memory that was used to store this\nframe. On the other hand, if the interpreter is currently\nevaluatingfib(n-1), then the environment created by this application offib(in whichnis 2) is active. In turn, the environment\noriginally created to applyfibto 3 is active because its return value\nhas not yet been computed."
+  },
+  {
+    "type": "p",
+    "content": "The higher-ordercount_framesfunction tracksopen_count, the number of\ncalls to the functionfthat have not yet returned. Themax_countattribute is the maximum value ever attained byopen_count, and it\ncorresponds to the maximum number of frames that are ever simultaneously\nactive during the course of computation."
+  },
+  {
+    "type": "code",
+    "content": ">>> def count_frames(f):\n        def counted(*args):\n            counted.open_count += 1\n            counted.max_count = max(counted.max_count, counted.open_count)\n            result = f(*args)\n            counted.open_count -= 1\n            return result\n        counted.open_count = 0\n        counted.max_count = 0\n        return counted\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> fib = count_frames(fib)\n>>> fib(19)\n4181\n>>> fib.open_count\n0\n>>> fib.max_count\n19\n>>> fib(24)\n46368\n>>> fib.max_count\n24\n"
+  },
+  {
+    "type": "p",
+    "content": "To summarize, the space requirement of thefibfunction, measured in\nactive frames, is one less than the input, which tends to be small. The time\nrequirement measured in total recursive calls is larger than the output, which\ntends to be huge."
+  },
+  {
+    "type": "h3",
+    "content": "2.8.2   Memoization"
+  },
+  {
+    "type": "p",
+    "content": "Tree-recursive computational processes can often be made more efficient throughmemoization, a powerful technique for increasing the efficiency of recursive\nfunctions that repeat computation. A memoized function will store the return\nvalue for any arguments it has previously received. A second call tofib(25)would not re-compute the return value recursively, but instead\nreturn the existing one that has already been constructed."
+  },
+  {
+    "type": "p",
+    "content": "Memoization can be expressed naturally as a higher-order function, which can\nalso be used as a decorator. The definition below creates acacheof\npreviously computed results, indexed by the arguments from which they were\ncomputed. The use of a dictionary requires that the argument to the memoized\nfunction be immutable."
+  },
+  {
+    "type": "code",
+    "content": ">>> def memo(f):\n        cache = {}\n        def memoized(n):\n            if n not in cache:\n                cache[n] = f(n)\n            return cache[n]\n        return memoized\n"
+  },
+  {
+    "type": "p",
+    "content": "If we applymemoto the recursive computation of Fibonacci numbers, a\nnew pattern of computation evolves, depicted below."
+  },
+  {
+    "type": "p",
+    "content": "In this computation offib(5), the results forfib(2)andfib(3)are reused when computingfib(4)on the right branch of the tree. As a\nresult, much of the tree-recursive computation is not required at all."
+  },
+  {
+    "type": "p",
+    "content": "Usingcount, we can see that thefibfunction is actually only called\nonce for each unique input tofib."
+  },
+  {
+    "type": "code",
+    "content": ">>> counted_fib = count(fib)\n>>> fib  = memo(counted_fib)\n>>> fib(19)\n4181\n>>> counted_fib.call_count\n20\n>>> fib(34)\n5702887\n>>> counted_fib.call_count\n35\n"
+  },
+  {
+    "type": "h3",
+    "content": "2.8.3   Orders of Growth"
+  },
+  {
+    "type": "p",
+    "content": "Processes can differ massively in the rates at which they consume the\ncomputational resources of space and time, as the previous examples illustrate.\nHowever, exactly determining just how much space or time will be used when\ncalling a function is a very difficult task that depends upon many factors.\nA useful way to analyze a process is to categorize it along with a group of\nprocesses that all have similar requirements. A useful categorization is theorder of growthof a process, which expresses in simple terms how the\nresource requirements of a process grow as a function of the input."
+  },
+  {
+    "type": "p",
+    "content": "As an introduction to orders of growth, we will analyze the functioncount_factorsbelow, which counts the number of integers that evenly divide\nan inputn. The function attempts to dividenby every integer less\nthan or equal to its square root. The implementation takes advantage of the\nfact that if$k$divides$n$and$k <\n\\sqrt{n}$, then there is another factor$j = n / k$such that$j > \\sqrt{n}$."
+  },
+  {
+    "type": "p",
+    "content": "How much time is required to evaluatecount_factors? The exact answer will\nvary on different machines, but we can make some useful general\nobservations about the amount of computation involved.  The total number of\ntimes this process executes the body of thewhilestatement is the greatest\ninteger less than$\\sqrt{n}$. The statements before and after thiswhilestatement are executed exactly once. So, the total number of\nstatements executed is$w \\cdot \\sqrt{n} + v$, where$w$is the number of statements in thewhilebody and$v$is the number of statements outside of thewhilestatement.\nAlthough it isn't exact, this formula generally characterizes how much time\nwill be required to evaluatecount_factorsas a function of the inputn."
+  },
+  {
+    "type": "p",
+    "content": "A more exact description is difficult to obtain. The constants$w$and$v$are not constant at all, because the assignment statements\ntofactorsare sometimes executed but sometimes not. An order of growth\nanalysis allows us to gloss over such details and instead focus on the general\nshape of growth. In particular, the order of growth forcount_factorsexpresses in precise terms that the amount of time required to computecount_factors(n)scales at the rate$\\sqrt{n}$, within a margin\nof some constant factors."
+  },
+  {
+    "type": "p",
+    "content": "Theta Notation.Let$n$be a parameter that measures the\nsize of the input to some process, and let$R(n)$be the amount of\nsome resource that the process requires for an input of size$n$.\nIn our previous examples we took$n$to be the number for which a\ngiven function is to be computed, but there are other possibilities. For\ninstance, if our goal is to compute an approximation to the square root of a\nnumber, we might take$n$to be the number of digits of accuracy\nrequired."
+  },
+  {
+    "type": "p",
+    "content": "$R(n)$might measure the amount of memory used, the number of\nelementary machine steps performed, and so on. In computers that do only\na fixed number of steps at a time, the time required to evaluate an\nexpression will be proportional to the number of elementary steps performed in\nthe process of evaluation."
+  },
+  {
+    "type": "p",
+    "content": "We say that$R(n)$has order of growth$\\Theta(f(n))$,\nwritten$R(n) = \\Theta(f(n))$(pronounced \"theta of$f(n)$\"), if there are positive constants$k_1$and$k_2$independent of$n$such that"
+  },
+  {
+    "type": "p",
+    "content": "for any value of$n$larger than some minimum$m$. In\nother words, for large$n$, the value$R(n)$is always\nsandwiched between two values that both scale with$f(n)$:"
+  },
+  {
+    "type": "p",
+    "content": "We can apply this definition to show that the number of steps required to\nevaluatecount_factors(n)grows as$\\Theta(\\sqrt{n})$by\ninspecting the function body."
+  },
+  {
+    "type": "p",
+    "content": "First, we choose$k_1=1$and$m=0$, so that the lower\nbound states thatcount_factors(n)requires at least$1 \\cdot\n\\sqrt{n}$steps for any$n>0$. There are at least 4 lines executed\noutside of thewhilestatement, each of which takes at least 1 step to\nexecute. There are at least two lines executed within thewhilebody, along\nwith the while header itself. All of these require at least one step. Thewhilebody is evaluated at least$\\sqrt{n}-1$times. Composing\nthese lower bounds, we see that the process requires at least$4 + 3\n\\cdot (\\sqrt{n}-1)$steps, which is always larger than$k_1 \\cdot\n\\sqrt{n}$."
+  },
+  {
+    "type": "p",
+    "content": "Second, we can verify the upper bound. We assume that any single line in\nthe body ofcount_factorsrequires at mostpsteps. This assumption\nisn't true for every line of Python, but does hold in this case.\nThen, evaluatingcount_factors(n)can require at most$p \\cdot\n(5 + 4 \\sqrt{n})$, because there are 5 lines outside of thewhilestatement and 4 within (including the header). This upper bound holds even if\neveryifheader evaluates to true. Finally, if we choose$k_2=5p$, then the steps required is always smaller than$k_2 \\cdot \\sqrt{n}$. Our argument is complete."
+  },
+  {
+    "type": "h3",
+    "content": "2.8.4   Example: Exponentiation"
+  },
+  {
+    "type": "p",
+    "content": "Consider the problem of computing the exponential of a given number. We would\nlike a function that takes as arguments a baseband a positive integer\nexponentnand computes$b^n$. One way to do this is via the\nrecursive definition"
+  },
+  {
+    "type": "p",
+    "content": "which translates readily into the recursive function"
+  },
+  {
+    "type": "code",
+    "content": ">>> def exp(b, n):\n        if n == 0:\n            return 1\n        return b * exp(b, n-1)\n"
+  },
+  {
+    "type": "p",
+    "content": "This is a linear recursive process that requires$\\Theta(n)$steps\nand$\\Theta(n)$space. Just as with factorial, we can\nreadily formulate an equivalent linear iteration that requires a similar number\nof steps but constant space."
+  },
+  {
+    "type": "code",
+    "content": ">>> def exp_iter(b, n):\n        result = 1\n        for _ in range(n):\n            result = result * b\n        return result\n"
+  },
+  {
+    "type": "p",
+    "content": "We can compute exponentials in fewer steps by using successive squaring. For\ninstance, rather than computing$b^8$as"
+  },
+  {
+    "type": "p",
+    "content": "we can compute it using three multiplications:"
+  },
+  {
+    "type": "p",
+    "content": "This method works fine for exponents that are powers of 2. We can also take\nadvantage of successive squaring in computing exponentials in general if we use\nthe recursive rule"
+  },
+  {
+    "type": "p",
+    "content": "We can express this method as a recursive function as well:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def square(x):\n        return x*x\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def fast_exp(b, n):\n        if n == 0:\n            return 1\n        if n % 2 == 0:\n            return square(fast_exp(b, n//2))\n        else:\n            return b * fast_exp(b, n-1)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> fast_exp(2, 100)\n1267650600228229401496703205376\n"
+  },
+  {
+    "type": "p",
+    "content": "The process evolved byfast_expgrows logarithmically withnin both\nspace and number of steps. To see this, observe that computing$b^{2n}$usingfast_exprequires only one more multiplication\nthan computing$b^n$. The size of the exponent we can compute\ntherefore doubles (approximately) with every new multiplication we are allowed.\nThus, the number of multiplications required for an exponent ofngrows\nabout as fast as the logarithm ofnbase 2. The process has$\\Theta(\\log n)$growth. The difference between$\\Theta(\\log n)$growth and$\\Theta(n)$growth becomes\nstriking as$n$becomes large. For example,fast_expfornof 1000 requires only 14 multiplications instead of 1000."
+  },
+  {
+    "type": "h3",
+    "content": "2.8.5   Growth Categories"
+  },
+  {
+    "type": "p",
+    "content": "Orders of growth are designed to simplify the analysis and comparison of\ncomputational processes. Many different processes can all have equivalent\norders of growth, which indicates that they scale in similar ways. It is an\nessential skill of a computer scientist to know and recognize common orders\nof growth and identify processes of the same order."
+  },
+  {
+    "type": "p",
+    "content": "Constants.Constant terms do not affect the order of growth of a process.\nSo, for instance,$\\Theta(n)$and$\\Theta(500 \\cdot\nn)$are the same order of growth. This property follows from the definition\nof theta notation, which allows us to choose arbitrary constants$k_1$and$k_2$(such as$\\frac{1}{500}$)\nfor the upper and lower bounds. For simplicity, constants are always omitted\nfrom orders of growth."
+  },
+  {
+    "type": "p",
+    "content": "Logarithms.The base of a logarithm does not affect the order of growth of\na process. For instance,$\\log_2 n$and$\\log_{10} n$are the same order of growth. Changing the base of a logarithm is equivalent to\nmultiplying by a constant factor."
+  },
+  {
+    "type": "p",
+    "content": "Nesting.When an inner computational process is repeated for each step in\nan outer process, then the order of growth of the entire process is a product\nof the number of steps in the outer and inner processes."
+  },
+  {
+    "type": "p",
+    "content": "For example, the functionoverlapbelow computes the number of elements in\nlistathat also appear in listb."
+  },
+  {
+    "type": "code",
+    "content": ">>> def overlap(a, b):\n        count = 0\n        for item in a:\n            if item in b:\n                count += 1\n        return count\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> overlap([1, 3, 2, 2, 5, 1], [5, 4, 2])\n3\n"
+  },
+  {
+    "type": "p",
+    "content": "Theinoperator for lists requires$\\Theta(n)$time, where$n$is the length of the listb. It is applied$\\Theta(m)$times, where$m$is the length of the lista. Theitem in bexpression is the inner process, and thefor item in\naloop is the outer process. The total order of growth for this function is$\\Theta(m \\cdot n)$."
+  },
+  {
+    "type": "p",
+    "content": "Lower-order terms.As the input to a process grows, the fastest growing\npart of a computation dominates the total resources used. Theta notation\ncaptures this intuition. In a sum, all but the fastest growing term can be\ndropped without changing the order of growth."
+  },
+  {
+    "type": "p",
+    "content": "For instance, consider theone_morefunction that returns how many elements\nof a listaare one more than some other element ofa. That is, in the\nlist[3, 14, 15, 9], the element 15 is one more than 14, soone_morewill return 1."
+  },
+  {
+    "type": "code",
+    "content": ">>> def one_more(a):\n        return overlap([x-1 for x in a], a)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> one_more([3, 14, 15, 9])\n1\n"
+  },
+  {
+    "type": "p",
+    "content": "There are two parts to this computation: the list comprehension and the call\ntooverlap. For a listaof length$n$,  list comprehension\nrequires$\\Theta(n)$steps, while the call tooverlaprequires$\\Theta(n^2)$steps. The sum of steps is$\\Theta(n +\nn^2)$, but this is not the simplest way of expressing the order of growth."
+  },
+  {
+    "type": "p",
+    "content": "$\\Theta(n^2 + k \\cdot n)$and$\\Theta(n^2)$are\nequivalent for any constant$k$because the$n^2$term\nwill eventually dominate the total for any$k$. The fact that\nbounds must hold only for$n$greater than some minimum$m$establishes this equivalence. For simplicity, lower-order terms\nare always omitted from orders of growth, and so we will never see a sum within\na theta expression."
+  },
+  {
+    "type": "p",
+    "content": "Common categories.Given these equivalence properties, a small set of\ncommon categories emerge to describe most computational processes. The most\ncommon are listed below from slowest to fastest growth, along with descriptions\nof the growth as the input increases. Examples for each category follow."
+  },
+  {
+    "type": "p",
+    "content": "Other categories exist, such as the$\\Theta(\\sqrt{n})$growth ofcount_factors. However, these categories are particularly common."
+  },
+  {
+    "type": "p",
+    "content": "Exponential growth describes many different orders of growth, because changing\nthe base$b$does affect the order of growth.  For instance,\nthe number of steps in our tree-recursive Fibonacci computationfibgrows\nexponentially in its input$n$. In particular, one can show that\nthe nth Fibonacci number is the closest integer to"
+  },
+  {
+    "type": "p",
+    "content": "where$\\phi$is the golden ratio:"
+  },
+  {
+    "type": "p",
+    "content": "We also stated that the number of steps scales with the resulting value, and so\nthe tree-recursive process requires$\\Theta(\\phi^n)$steps, a function\nthat grows exponentially with$n$."
+  },
+  {
+    "type": "p",
+    "content": "Continue:2.9 Recursive Objects"
+  }
+]

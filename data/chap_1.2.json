@@ -1,0 +1,382 @@
+[
+  {
+    "type": "h2",
+    "content": "1.2   Elements of Programming"
+  },
+  {
+    "type": "p",
+    "content": "A programming language is more than just a means for instructing a computer to\nperform tasks. The language also serves as a framework within which we organize\nour ideas about computational processes. Programs serve to communicate those\nideas among the members of a programming community. Thus, programs must be\nwritten for people to read, and only incidentally for machines to execute."
+  },
+  {
+    "type": "p",
+    "content": "When we describe a language, we should pay particular attention to the means\nthat the language provides for combining simple ideas to form more complex\nideas. Every powerful language has three such mechanisms:"
+  },
+  {
+    "type": "p",
+    "content": "In programming, we deal with two kinds of elements: functions and data. (Soon\nwe will discover that they are really not so distinct.) Informally, data is\nstuff that we want to manipulate, and functions describe the rules for\nmanipulating the data. Thus, any powerful programming language should\nbe able to describe primitive data and primitive functions, as well as have some\nmethods for combining and abstracting both functions and data."
+  },
+  {
+    "type": "h3",
+    "content": "1.2.1   Expressions"
+  },
+  {
+    "type": "p",
+    "content": "Having experimented with the full Python interpreter in the previous section,\nwe now start anew, methodically developing the Python language element by\nelement.  Be patient if the examples seem simplistic — more exciting material\nis soon to come."
+  },
+  {
+    "type": "p",
+    "content": "We begin with primitive expressions. One kind of primitive expression is a\nnumber. More precisely, the expression that you type consists of the numerals\nthat represent the number in base 10."
+  },
+  {
+    "type": "code",
+    "content": ">>> 42\n42\n"
+  },
+  {
+    "type": "p",
+    "content": "Expressions representing numbers may be combined with mathematical operators\nto form a compound expression, which the interpreter will evaluate:"
+  },
+  {
+    "type": "code",
+    "content": ">>> -1 - -1\n0\n>>> 1/2 + 1/4 + 1/8 + 1/16 + 1/32 + 1/64 + 1/128\n0.9921875\n"
+  },
+  {
+    "type": "p",
+    "content": "These mathematical expressions useinfixnotation, where theoperator(e.g.,+,-,*, or/) appears in between theoperands(numbers). Python includes many ways to form compound expressions. Rather than\nattempt to enumerate them all immediately, we will introduce new expression\nforms as we go, along with the language features that they support."
+  },
+  {
+    "type": "h3",
+    "content": "1.2.2   Call Expressions"
+  },
+  {
+    "type": "p",
+    "content": "The most important kind of compound expression is acall expression, which\napplies a function to some arguments. Recall from algebra that the mathematical\nnotion of a function is a mapping from some input arguments to an output value.\nFor instance, themaxfunction maps its inputs to a single output, which is\nthe largest of the inputs.  The way in which Python expresses function\napplication is the same as in conventional mathematics."
+  },
+  {
+    "type": "code",
+    "content": ">>> max(7.5, 9.5)\n9.5\n"
+  },
+  {
+    "type": "p",
+    "content": "This call expression has subexpressions: theoperatoris an expression that\nprecedes parentheses, which enclose a comma-delimited list ofoperandexpressions."
+  },
+  {
+    "type": "p",
+    "content": "The operator specifies afunction.  When this call expression is evaluated,\nwe say that the functionmaxiscalledwitharguments7.5 and 9.5, andreturnsavalueof 9.5."
+  },
+  {
+    "type": "p",
+    "content": "The order of the arguments in a call expression matters. For instance, the\nfunctionpowraises its first argument to the power of its second argument."
+  },
+  {
+    "type": "code",
+    "content": ">>> pow(100, 2)\n10000\n>>> pow(2, 100)\n1267650600228229401496703205376\n"
+  },
+  {
+    "type": "p",
+    "content": "Function notation has three principal advantages over the mathematical\nconvention of infix notation. First, functions may take an arbitrary number of\narguments:"
+  },
+  {
+    "type": "code",
+    "content": ">>> max(1, -2, 3, -4)\n3\n"
+  },
+  {
+    "type": "p",
+    "content": "No ambiguity can arise, because the function name always precedes its\narguments."
+  },
+  {
+    "type": "p",
+    "content": "Second, function notation extends in a straightforward way tonestedexpressions, where the elements are themselves compound expressions. In nested\ncall expressions, unlike compound infix expressions, the structure of the\nnesting is entirely explicit in the parentheses."
+  },
+  {
+    "type": "code",
+    "content": ">>> max(min(1, -2), min(pow(3, 5), -4))\n-2\n"
+  },
+  {
+    "type": "p",
+    "content": "There is no limit (in principle) to the depth of such nesting and to the overall\ncomplexity of the expressions that the Python interpreter can evaluate.\nHowever, humans quickly get confused by multi-level nesting. An important role\nfor you as a programmer is to structure expressions so that they remain\ninterpretable by yourself, your programming partners, and other people who may\nread your expressions in the future."
+  },
+  {
+    "type": "p",
+    "content": "Third, mathematical notation has a great variety of forms:  multiplication\nappears between terms, exponents appear as superscripts, division as a\nhorizontal bar, and a square root as a roof with slanted siding. Some of this\nnotation is very hard to type! However, all of this complexity can be unified\nvia the notation of call expressions. While Python supports common mathematical\noperators using infix notation (like+and-), any operator can be\nexpressed as a function with a name."
+  },
+  {
+    "type": "h3",
+    "content": "1.2.3   Importing Library Functions"
+  },
+  {
+    "type": "p",
+    "content": "Python defines a very large number of functions, including the operator\nfunctions mentioned in the preceding section, but does not make all of their\nnames available by default. Instead, it organizes the functions and other\nquantities that it knows about into modules, which together comprise the Python\nLibrary.  To use these elements, one imports them. For example, themathmodule provides a variety of familiar mathematical functions:"
+  },
+  {
+    "type": "code",
+    "content": ">>> from math import sqrt\n>>> sqrt(256)\n16.0\n"
+  },
+  {
+    "type": "p",
+    "content": "and theoperatormodule provides access to functions corresponding to infix\noperators:"
+  },
+  {
+    "type": "code",
+    "content": ">>> from operator import add, sub, mul\n>>> add(14, 28)\n42\n>>> sub(100, mul(7, add(8, 4)))\n16\n"
+  },
+  {
+    "type": "p",
+    "content": "Animportstatement designates a module name (e.g.,operatorormath), and then lists the named attributes of that module to import (e.g.,sqrt). Once a function is imported, it can be called multiple times."
+  },
+  {
+    "type": "p",
+    "content": "There is no difference between using these operator functions (e.g.,add)\nand the operator symbols themselves (e.g.,+). Conventionally, most\nprogrammers use symbols and infix notation to express simple arithmetic."
+  },
+  {
+    "type": "p",
+    "content": "ThePython 3 Library Docslist the functions defined by each module, such as\nthemath module. However, this documentation is written for developers who\nknow the whole language well. For now, you may find that experimenting with a\nfunction tells you more about its behavior than reading the documentation.  As\nyou become familiar with the Python language and vocabulary, this documentation\nwill become a valuable reference source."
+  },
+  {
+    "type": "h3",
+    "content": "1.2.4   Names and the Environment"
+  },
+  {
+    "type": "p",
+    "content": "A critical aspect of a programming language is the means it provides for using\nnames to refer to computational objects. If a value has been given a name, we\nsay that the namebindsto the value."
+  },
+  {
+    "type": "p",
+    "content": "In Python, we can establish new bindings using the assignment statement, which\ncontains a name to the left of=and a value to the right:"
+  },
+  {
+    "type": "code",
+    "content": ">>> radius = 10\n>>> radius\n10\n>>> 2 * radius\n20\n"
+  },
+  {
+    "type": "p",
+    "content": "Names are also bound viaimportstatements."
+  },
+  {
+    "type": "code",
+    "content": ">>> from math import pi\n>>> pi * 71 / 223\n1.0002380197528042\n"
+  },
+  {
+    "type": "p",
+    "content": "The=symbol is called theassignmentoperator in Python (and many other\nlanguages). Assignment is our simplest means ofabstraction, for it allows us\nto use simple names to refer to the results of compound operations, such as theareacomputed above. In this way, complex programs are constructed by\nbuilding, step by step, computational objects of increasing complexity."
+  },
+  {
+    "type": "p",
+    "content": "The possibility of binding names to values and later retrieving those values by\nname means that the interpreter must maintain some sort of memory that keeps\ntrack of the names, values, and bindings. This memory is called anenvironment."
+  },
+  {
+    "type": "p",
+    "content": "Names can also be bound to functions.  For instance, the namemaxis bound\nto the max function we have been using. Functions, unlike numbers, are tricky to\nrender as text, so Python prints an identifying description instead, when asked\nto describe a function:"
+  },
+  {
+    "type": "code",
+    "content": ">>> max\n<built-in function max>\n"
+  },
+  {
+    "type": "p",
+    "content": "We can use assignment statements to give new names to existing functions."
+  },
+  {
+    "type": "code",
+    "content": ">>> f = max\n>>> f\n<built-in function max>\n>>> f(2, 3, 4)\n4\n"
+  },
+  {
+    "type": "p",
+    "content": "And successive assignment statements can rebind a name to a new value."
+  },
+  {
+    "type": "code",
+    "content": ">>> f = 2\n>>> f\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "In Python, names are often calledvariable namesorvariablesbecause they\ncan be bound to different values in the course of executing a program. When a\nname is bound to a new value through assignment, it is no longer bound to any\nprevious value.  One can even bind built-in names to new values."
+  },
+  {
+    "type": "code",
+    "content": ">>> max = 5\n>>> max\n5\n"
+  },
+  {
+    "type": "p",
+    "content": "After assigningmaxto 5, the namemaxis no longer bound to a\nfunction, and so attempting to callmax(2, 3, 4)will cause an error."
+  },
+  {
+    "type": "p",
+    "content": "When executing an assignment statement, Python evaluates the expression to the\nright of=before changing the binding to the name on the left.  Therefore,\none can refer to a name in right-side expression, even if it is the name to be\nbound by the assignment statement."
+  },
+  {
+    "type": "code",
+    "content": ">>> x = 2\n>>> x = x + 1\n>>> x\n3\n"
+  },
+  {
+    "type": "p",
+    "content": "We can also assign multiple values to multiple names in a single statement,\nwhere names on the left of=and expressions on the right of=are\nseparated by commas."
+  },
+  {
+    "type": "code",
+    "content": ">>> area, circumference = pi * radius * radius, 2 * pi * radius\n>>> area\n314.1592653589793\n>>> circumference\n62.83185307179586\n"
+  },
+  {
+    "type": "p",
+    "content": "Changing the value of one name does not affect other names. Below, even though\nthe nameareawas bound to a value defined originally in terms ofradius, the value ofareahas not changed.  Updating the value ofarearequires another assignment statement."
+  },
+  {
+    "type": "code",
+    "content": ">>> radius = 11\n>>> area\n314.1592653589793\n>>> area = pi * radius * radius\n380.132711084365\n"
+  },
+  {
+    "type": "p",
+    "content": "With multiple assignment,allexpressions to the right of=are evaluated\nbeforeanynames to the left are bound to those values. As a result of this\nrule, swapping the values bound to two names can be performed in a single\nstatement."
+  },
+  {
+    "type": "code",
+    "content": ">>> x, y = 3, 4.5\n>>> y, x = x, y\n>>> x\n4.5\n>>> y\n3\n"
+  },
+  {
+    "type": "h3",
+    "content": "1.2.5   Evaluating Nested Expressions"
+  },
+  {
+    "type": "p",
+    "content": "One of our goals in this chapter is to isolate issues about thinking\nprocedurally. As a case in point, let us consider that, in evaluating nested\ncall expressions, the interpreter is itself following a procedure."
+  },
+  {
+    "type": "p",
+    "content": "To evaluate a call expression, Python will do the following:"
+  },
+  {
+    "type": "p",
+    "content": "Even this simple procedure illustrates some important points about processes in\ngeneral. The first step dictates that in order to accomplish the evaluation\nprocess for a call expression we must first evaluate other expressions. Thus,\nthe evaluation procedure isrecursivein nature; that is, it includes, as one\nof its steps, the need to invoke the rule itself."
+  },
+  {
+    "type": "p",
+    "content": "For example, evaluating"
+  },
+  {
+    "type": "code",
+    "content": ">>> sub(pow(2, add(1, 10)), pow(2, 5))\n2016\n"
+  },
+  {
+    "type": "p",
+    "content": "requires that this evaluation procedure be applied four times. If we draw each\nexpression that we evaluate, we can visualize the hierarchical structure of this\nprocess."
+  },
+  {
+    "type": "p",
+    "content": "This illustration is called anexpression tree.  In computer science, trees\nconventionally grow from the top down.  The objects at each point in a tree are\ncalled nodes; in this case, they are expressions paired with their values."
+  },
+  {
+    "type": "p",
+    "content": "Evaluating its root, the full expression at the top, requires first evaluating\nthe branches that are its subexpressions.  The leaf expressions (that is, nodes\nwith no branches stemming from them) represent either functions or numbers. The\ninterior nodes have two parts: the call expression to which our evaluation rule\nis applied, and the result of that expression.  Viewing evaluation in terms of\nthis tree, we can imagine that the values of the operands percolate upward,\nstarting from the terminal nodes and then combining at higher and higher\nlevels."
+  },
+  {
+    "type": "p",
+    "content": "Next, observe that the repeated application of the first step brings us to the\npoint where we need to evaluate, not call expressions, but primitive expressions\nsuch as numerals (e.g., 2) and names (e.g.,add). We take care of the\nprimitive cases by stipulating that"
+  },
+  {
+    "type": "p",
+    "content": "Notice the important role of an environment in determining the meaning of the\nsymbols in expressions. In Python, it is meaningless to speak of the value of an\nexpression such as"
+  },
+  {
+    "type": "code",
+    "content": ">>> add(x, 1)\n"
+  },
+  {
+    "type": "p",
+    "content": "without specifying any information about the environment that would provide a\nmeaning for the namex(or even for the nameadd). Environments provide\nthe context in which evaluation takes place, which plays an important role in\nour understanding of program execution."
+  },
+  {
+    "type": "p",
+    "content": "This evaluation procedure does not suffice to evaluate all Python code, only\ncall expressions, numerals, and names. For instance, it does not handle\nassignment statements.  Executing"
+  },
+  {
+    "type": "code",
+    "content": ">>> x = 3\n"
+  },
+  {
+    "type": "p",
+    "content": "does not return a value nor evaluate a function on some arguments, since the\npurpose of assignment is instead to bind a name to a value.  In general,\nstatements are not evaluated butexecuted; they do not produce a value but\ninstead make some change. Each type of expression or statement has its own\nevaluation or execution procedure."
+  },
+  {
+    "type": "p",
+    "content": "A pedantic note: when we say that \"a numeral evaluates to a number,\" we actually\nmean that the Python interpreter evaluates a numeral to a number.  It is the\ninterpreter which endows meaning to the programming language.  Given that the\ninterpreter is a fixed program that always behaves consistently, we can say that\nnumerals (and expressions) themselves evaluate to values in the context of\nPython programs."
+  },
+  {
+    "type": "h3",
+    "content": "1.2.6   The Non-Pure Print Function"
+  },
+  {
+    "type": "p",
+    "content": "Throughout this text, we will distinguish between two types of functions."
+  },
+  {
+    "type": "p",
+    "content": "Pure functions.Functions have some input (their arguments) and return some\noutput (the result of applying them).  The built-in function"
+  },
+  {
+    "type": "code",
+    "content": ">>> abs(-2)\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "can be depicted as a small machine that takes input and produces output."
+  },
+  {
+    "type": "p",
+    "content": "The functionabsispure. Pure functions have the property that applying\nthem has no effects beyond returning a value. Moreover, a pure function must\nalways return the same value when called twice with the same arguments."
+  },
+  {
+    "type": "p",
+    "content": "Non-pure functions.In addition to returning a value, applying a non-pure\nfunction can generateside effects, which make some change to the state of the\ninterpreter or computer. A common side effect is to generate additional output\nbeyond the return value, using theprintfunction."
+  },
+  {
+    "type": "code",
+    "content": ">>> print(1, 2, 3)\n1 2 3\n"
+  },
+  {
+    "type": "p",
+    "content": "Whileprintandabsmay appear to be similar in these examples, they\nwork in fundamentally different ways. The value thatprintreturns is\nalwaysNone, a special Python value that represents nothing. The\ninteractive Python interpreter does not automatically print the valueNone.\nIn the case ofprint, the function itself is printing output as a side\neffect of being called."
+  },
+  {
+    "type": "p",
+    "content": "A nested expression of calls toprinthighlights the non-pure character of\nthe function."
+  },
+  {
+    "type": "code",
+    "content": ">>> print(print(1), print(2))\n1\n2\nNone None\n"
+  },
+  {
+    "type": "p",
+    "content": "If you find this output to be unexpected, draw an expression tree to clarify why\nevaluating this expression produces this peculiar output."
+  },
+  {
+    "type": "p",
+    "content": "Be careful withprint!  The fact that it returnsNonemeans that itshould notbe the expression in an assignment statement."
+  },
+  {
+    "type": "code",
+    "content": ">>> two = print(2)\n2\n>>> print(two)\nNone\n"
+  },
+  {
+    "type": "p",
+    "content": "Pure functions are restricted in that they cannot have side effects or change\nbehavior over time. Imposing these restrictions yields substantial benefits.\nFirst, pure functions can be composed more reliably into compound call\nexpressions.  We can see in the non-pure function example above thatprintdoes not return a useful result when used in an operand expression.  On the\nother hand, we have seen that functions such asmax,powandsqrtcan be used effectively in nested expressions."
+  },
+  {
+    "type": "p",
+    "content": "Second, pure functions tend to be simpler to test. A list of arguments will\nalways lead to the same return value, which can be compared to the expected\nreturn value. Testing is discussed in more detail later in this chapter."
+  },
+  {
+    "type": "p",
+    "content": "Third, Chapter 4 will illustrate that pure functions are essential for writingconcurrentprograms, in which multiple call expressions may be evaluated\nsimultaneously."
+  },
+  {
+    "type": "p",
+    "content": "By contrast, Chapter 2 investigates a range of non-pure functions and describes\ntheir uses."
+  },
+  {
+    "type": "p",
+    "content": "For these reasons, we concentrate heavily on creating and using pure functions\nin the remainder of this chapter.  Theprintfunction is only used so that\nwe can see the intermediate results of computations."
+  },
+  {
+    "type": "p",
+    "content": "Continue:1.3 Defining New Functions"
+  }
+]

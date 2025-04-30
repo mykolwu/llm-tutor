@@ -1,0 +1,226 @@
+[
+  {
+    "type": "h2",
+    "content": "3.4   Interpreters for Languages with Combination"
+  },
+  {
+    "type": "p",
+    "content": "We now embark on a tour of the technology by which languages are established in\nterms of other languages.Metalinguistic abstraction— establishing new\nlanguages — plays an important role in all branches of engineering design. It\nis particularly important to computer programming, because in programming not\nonly can we formulate new languages but we can also implement these languages\nby constructing interpreters. An interpreter for a programming language is a\nfunction that, when applied to an expression of the language, performs the\nactions required to evaluate that expression."
+  },
+  {
+    "type": "p",
+    "content": "We will first define an interpreter for a language that is a limited subset of\nScheme, called Calculator.  Then, we will develop a sketch of an interpreter\nfor Scheme as a whole.  The interpreter we create will be complete in the sense\nthat it will allow us to write fully general programs in Scheme. To do so, it\nwill implement the same environment model of evaluation that we introduced for\nPython programs in Chapter 1."
+  },
+  {
+    "type": "p",
+    "content": "Many of the examples in this section are contained in the companionScheme-Syntax Calculator example, as they are\ntoo complex to fit naturally in the format of this text."
+  },
+  {
+    "type": "h3",
+    "content": "3.4.1   A Scheme-Syntax Calculator"
+  },
+  {
+    "type": "p",
+    "content": "The Scheme-Syntax Calculator (or simply Calculator) is an expression language\nfor the arithmetic operations of addition, subtraction, multiplication, and\ndivision. Calculator shares Scheme's call expression syntax and operator\nbehavior. Addition (+) and multiplication (*) operations each take an\narbitrary number of arguments:"
+  },
+  {
+    "type": "p",
+    "content": "Subtraction (-) has two behaviors.  With one argument, it negates the\nargument.  With at least two arguments, it subtracts all but the first from the\nfirst.  Division (/) has a similar pair of two behaviors: compute the\nmultiplicative inverse of a single argument or divide all but the first into the\nfirst:"
+  },
+  {
+    "type": "p",
+    "content": "A call expression is evaluated by evaluating its operand sub-expressions, then\napplying the operator to the resulting arguments:"
+  },
+  {
+    "type": "p",
+    "content": "We will implement an interpreter for the Calculator language in Python.  That\nis, we will write a Python program that takes string lines as input and returns\nthe result of evaluating those lines as a Calculator expression.  Our\ninterpreter will raise an appropriate exception if the calculator expression is\nnot well formed."
+  },
+  {
+    "type": "h3",
+    "content": "3.4.2   Expression Trees"
+  },
+  {
+    "type": "p",
+    "content": "Until this point in the course, expression trees have been conceptual entities\nto which we have referred in describing the process of evaluation; we have\nnever before explicitly represented expression trees as data in our programs.\nIn order to write an interpreter, we must operate on expressions as data."
+  },
+  {
+    "type": "p",
+    "content": "A primitive expression is just a number or a string in Calculator: either anintorfloator an operator symbol. All combined expressions\nare call expressions.  A call expression is a Scheme list with a first element\n(the operator) followed by zero or more operand expressions."
+  },
+  {
+    "type": "p",
+    "content": "Scheme Pairs.In Scheme, lists are nested pairs, but not all pairs are\nlists.  To represent Scheme pairs and lists in Python, we will define a classPairthat is similar to theRlistclass earlier in the chapter. The\nimplementation appears inscheme_reader."
+  },
+  {
+    "type": "p",
+    "content": "The empty list is represented by an object callednil, which is an instance\nof the classnil. We assume that only onenilinstance will ever be\ncreated."
+  },
+  {
+    "type": "p",
+    "content": "ThePairclass andnilobject are Scheme values represented in Python.\nThey havereprstrings that are Python expressions andstrstrings that\nare Scheme expressions."
+  },
+  {
+    "type": "code",
+    "content": ">>> s = Pair(1, Pair(2, nil))\n>>> s\nPair(1, Pair(2, nil))\n>>> print(s)\n(1 2)\n"
+  },
+  {
+    "type": "p",
+    "content": "They implement the basic Python sequence interface of length and element\nselection, as well as amapmethod that returns a Scheme list."
+  },
+  {
+    "type": "code",
+    "content": ">>> len(s)\n2\n>>> s[1]\n2\n>>> print(s.map(lambda x: x+4))\n(5 6)\n"
+  },
+  {
+    "type": "p",
+    "content": "Nested Lists.Nested pairs can represent lists, but the elements of a\nlist can also be lists themselves. Pairs are therefore sufficient to represent\nScheme expressions, which are in fact nested lists."
+  },
+  {
+    "type": "code",
+    "content": ">>> expr = Pair('+', Pair(Pair('*', Pair(3, Pair(4, nil))), Pair(5, nil)))\n>>> print(expr)\n(+ (* 3 4) 5)\n>>> print(expr.second.first)\n(* 3 4)\n>>> expr.second.first.second.first\n3\n"
+  },
+  {
+    "type": "p",
+    "content": "This example demonstrates that all Calculator expressions are nested Scheme\nlists. Our Calculator interpreter will read in nested Scheme lists, convert\nthem into expression trees represented as nestedPairinstances (Parsing\nexpressionsbelow), and then evaluate the expression trees to produce values\n(Calculator evaluationbelow)."
+  },
+  {
+    "type": "h3",
+    "content": "3.4.3   Parsing Expressions"
+  },
+  {
+    "type": "p",
+    "content": "Parsing is the process of generating expression trees from raw text input.  A\nparser is a composition of two components: a lexical analyzer and a syntactic\nanalyzer.  First, thelexical analyzerpartitions the input string intotokens, which are the minimal syntactic units of the language such as names\nand symbols. Second, thesyntactic analyzerconstructs an expression tree\nfrom this sequence of tokens.  The sequence of tokens produced by the lexical\nanalyzer is consumed by the syntactic analyzer."
+  },
+  {
+    "type": "p",
+    "content": "Lexical analysis.The component that interprets a string as a token\nsequence is called atokenizerorlexical analyzer. In our implementation,\nthe tokenizer is a function calledtokenize_lineinscheme_tokens. Scheme\ntokens are delimited by white space, parentheses, dots, or single quotation\nmarks.  Delimiters are tokens, as are symbols and numerals. The tokenizer\nanalyzes a line character by character, validating the format of symbols and\nnumerals."
+  },
+  {
+    "type": "p",
+    "content": "Tokenizing a well-formed Calculator expression separates all symbols and\ndelimiters, but identifies multi-character numbers (e.g., 2.3) and converts\nthem into numeric types."
+  },
+  {
+    "type": "code",
+    "content": ">>> tokenize_line('(+ 1 (* 2.3 45))')\n['(', '+', 1, '(', '*', 2.3, 45, ')', ')']\n"
+  },
+  {
+    "type": "p",
+    "content": "Lexical analysis is an iterative process, and it can be applied to each line of\nan input program in isolation."
+  },
+  {
+    "type": "p",
+    "content": "Syntactic analysis.The component that interprets a token sequence as an\nexpression tree is called asyntactic analyzer. Syntactic analysis is a\ntree-recursive process, and it must consider an entire expression that may span\nmultiple lines."
+  },
+  {
+    "type": "p",
+    "content": "Syntactic analysis is implemented by thescheme_readfunction inscheme_reader. It is tree-recursive because analyzing a sequence of tokens\noften involves analyzing a subsequence of those tokens into a subexpression,\nwhich itself serves as a branch (e.g., operand) of a larger expression tree.\nRecursion generates the hierarchical structures consumed by the evaluator."
+  },
+  {
+    "type": "p",
+    "content": "Thescheme_readfunction expects its inputsrcto be aBufferinstance that gives access to a sequence of tokens. ABuffer, defined in\nthebuffermodule, collects tokens that span multiple lines into a single\nobject that can be analyzed syntactically."
+  },
+  {
+    "type": "code",
+    "content": ">>> lines = ['(+ 1', '   (* 2.3 45))']\n>>> expression = scheme_read(Buffer(tokenize_lines(lines)))\n>>> expression\nPair('+', Pair(1, Pair(Pair('*', Pair(2.3, Pair(45, nil))), nil)))\n>>> print(expression)\n(+ 1 (* 2.3 45))\n"
+  },
+  {
+    "type": "p",
+    "content": "Thescheme_readfunction first checks for various base cases, including\nempty input (which raises an end-of-file exception, calledEOFErrorin\nPython) and primitive expressions. A recursive call toread_tailis invoked\nwhenever a(token indicates the beginning of a list."
+  },
+  {
+    "type": "p",
+    "content": "Theread_tailfunction continues to read from the same inputsrc, but\nexpects to be called after a list has begun.  Its base cases are an empty input\n(an error) or a closing parenthesis that terminates the list.  Its recursive\ncall reads the first element of the list withscheme_read, reads the rest\nof the list withread_tail, and then returns a list represented as aPair."
+  },
+  {
+    "type": "p",
+    "content": "This implementation ofscheme_readcan read well-formed Scheme lists, which\nare all we need for the Calculator language. Parsing dotted lists and quoted\nforms is left as an exercise."
+  },
+  {
+    "type": "p",
+    "content": "Informative syntax errors improve the usability of an interpreter\nsubstantially. TheSyntaxErrorexceptions that are raised include\na description of the problem encountered."
+  },
+  {
+    "type": "h3",
+    "content": "3.4.4   Calculator Evaluation"
+  },
+  {
+    "type": "p",
+    "content": "Thescalcmodule implements an evaluator for the Calculator language.  Thecalc_evalfunction takes an expression as an argument and\nreturns its value. Definitions of the helper functionssimplify,reduce, andas_scheme_listappear in the model and are used below."
+  },
+  {
+    "type": "p",
+    "content": "For Calculator, the only two legal syntactic forms of expressions are numbers\nand call expressions, which arePairinstances representing well-formed\nScheme lists.  Numbers areself-evaluating; they can be returned directly\nfromcalc_eval. Call expressions require function application."
+  },
+  {
+    "type": "code",
+    "content": ">>> def calc_eval(exp):\n        \"\"\"Evaluate a Calculator expression.\"\"\"\n        if type(exp) in (int, float):\n            return simplify(exp)\n        elif isinstance(exp, Pair):\n            arguments = exp.second.map(calc_eval)\n            return simplify(calc_apply(exp.first, arguments))\n        else:\n            raise TypeError(exp + ' is not a number or call expression')\n"
+  },
+  {
+    "type": "p",
+    "content": "Call expressions are evaluated by first recursively mapping thecalc_evalfunction to the list of operands, which computes a list ofarguments.\nThen, the operator is applied to those arguments in a second function,calc_apply."
+  },
+  {
+    "type": "p",
+    "content": "The Calculator language is simple enough that we can easily express the logic\nof applying each operator in the body of a single function.  Incalc_apply,\neach conditional clause corresponds to applying one operator."
+  },
+  {
+    "type": "code",
+    "content": ">>> def calc_apply(operator, args):\n        \"\"\"Apply the named operator to a list of args.\"\"\"\n        if not isinstance(operator, str):\n            raise TypeError(str(operator) + ' is not a symbol')\n        if operator == '+':\n            return reduce(add, args, 0)\n        elif operator == '-':\n            if len(args) == 0:\n                raise TypeError(operator + ' requires at least 1 argument')\n            elif len(args) == 1:\n                return -args.first\n            else:\n                return reduce(sub, args.second, args.first)\n        elif operator == '*':\n            return reduce(mul, args, 1)\n        elif operator == '/':\n            if len(args) == 0:\n                raise TypeError(operator + ' requires at least 1 argument')\n            elif len(args) == 1:\n                return 1/args.first\n            else:\n                return reduce(truediv, args.second, args.first)\n        else:\n            raise TypeError(operator + ' is an unknown operator')\n"
+  },
+  {
+    "type": "p",
+    "content": "Above, each suite computes the result of a different operator or raises an\nappropriateTypeErrorwhen the wrong number of arguments is given. Thecalc_applyfunction can be applied directly, but it must be passed a list\nofvaluesas arguments rather than a list of operand expressions."
+  },
+  {
+    "type": "code",
+    "content": ">>> calc_apply('+', as_scheme_list(1, 2, 3))\n6\n>>> calc_apply('-', as_scheme_list(10, 1, 2, 3))\n4\n>>> calc_apply('*', nil)\n1\n>>> calc_apply('*', as_scheme_list(1, 2, 3, 4, 5))\n120\n>>> calc_apply('/', as_scheme_list(40, 5))\n8.0\n"
+  },
+  {
+    "type": "p",
+    "content": "The role ofcalc_evalis to make proper calls tocalc_applyby first\ncomputing the value of operand sub-expressions before passing them as arguments\ntocalc_apply. Thus,calc_evalcan accept a nested expression."
+  },
+  {
+    "type": "code",
+    "content": ">>> print(exp)\n(+ (* 3 4) 5)\n>>> calc_eval(exp)\n17\n"
+  },
+  {
+    "type": "p",
+    "content": "The structure ofcalc_evalis an example of dispatching on type: the form\nof the expression. The first form of expression is a number, which requires no\nadditional evaluation step. In general, primitive expressions that do not\nrequire an additional evaluation step are calledself-evaluating. The only\nself-evaluating expressions in our Calculator language are numbers, but a\ngeneral programming language might also include strings, boolean values, etc."
+  },
+  {
+    "type": "p",
+    "content": "Read-eval-print loops.A typical approach to interacting with an\ninterpreter is through a read-eval-print loop, or REPL, which is a mode of\ninteraction that reads an expression, evaluates it, and prints the result for\nthe user.  The Python interactive session is an example of such a loop."
+  },
+  {
+    "type": "p",
+    "content": "An implementation of a REPL can be largely independent of the interpreter it\nuses. The functionread_eval_print_loopbelow buffers input from the user,\nconstructs an expression using the language-specificscheme_readfunction,\nthen prints the result of applyingcalc_evalto that expression."
+  },
+  {
+    "type": "code",
+    "content": ">>> def read_eval_print_loop():\n        \"\"\"Run a read-eval-print loop for calculator.\"\"\"\n        while True:\n            src = buffer_input()\n            while src.more_on_line:\n                expression = scheme_read(src)\n                print(calc_eval(expression))\n"
+  },
+  {
+    "type": "p",
+    "content": "This version ofread_eval_print_loopcontains all of the essential\ncomponents of an interactive interface.  An example session would look like:"
+  },
+  {
+    "type": "p",
+    "content": "This loop implementation has no mechanism for termination or error handling.\nWe can improve the interface by reporting errors to the user. We can also allow\nthe user to exit the loop by signalling a keyboard interrupt (Control-Con\nUNIX) or end-of-file exception (Control-Don UNIX). To enable these\nimprovements, we place the original suite of thewhilestatement within atrystatement.  The firstexceptclause handlesSyntaxErrorandValueErrorexceptions raised byscheme_readas well asTypeErrorandZeroDivisionErrorexceptions raised bycalc_eval."
+  },
+  {
+    "type": "code",
+    "content": ">>> def read_eval_print_loop():\n        \"\"\"Run a read-eval-print loop for calculator.\"\"\"\n        while True:\n            try:\n                src = buffer_input()\n                while src.more_on_line:\n                    expression = scheme_read(src)\n                    print(calc_eval(expression))\n            except (SyntaxError, TypeError, ValueError, ZeroDivisionError) as err:\n                print(type(err).__name__ + ':', err)\n            except (KeyboardInterrupt, EOFError):  # <Control>-D, etc.\n                print('Calculation completed.')\n                return\n"
+  },
+  {
+    "type": "p",
+    "content": "This loop implementation reports errors without exiting the loop.  Rather than\nexiting the program on an error, restarting the loop after an error message\nlets users revise their expressions. Upon importing thereadlinemodule,\nusers can even recall their previous inputs using the up arrow orControl-P. The final result provides an informative error reporting\ninterface:"
+  },
+  {
+    "type": "p",
+    "content": "As we generalize our interpreter to new languages other than Calculator, we\nwill see that theread_eval_print_loopis parameterized by a parsing\nfunction, an evaluation function, and the exception types handled by thetrystatement.  Beyond these changes, all REPLs can be implemented using the same\nstructure."
+  },
+  {
+    "type": "p",
+    "content": "Continue:3.5 Interpreters for Languages with Abstraction"
+  }
+]

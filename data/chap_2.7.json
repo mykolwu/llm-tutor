@@ -1,0 +1,458 @@
+[
+  {
+    "type": "h2",
+    "content": "2.7   Object Abstraction"
+  },
+  {
+    "type": "p",
+    "content": "The object system allows programmers to build and use abstract data\nrepresentations efficiently. It is also designed to allow multiple\nrepresentations of abstract data to coexist in the same program."
+  },
+  {
+    "type": "p",
+    "content": "A central concept in object abstraction is ageneric function, which is a\nfunction that can accept values of multiple different types. We will consider\nthree different techniques for implementing generic functions: shared\ninterfaces, type dispatching, and type coercion. In the process of building up\nthese concepts, we will also discover features of the Python object system that\nsupport the creation of generic functions."
+  },
+  {
+    "type": "h3",
+    "content": "2.7.1   String Conversion"
+  },
+  {
+    "type": "p",
+    "content": "To represent data effectively, an object value should behave like the kind of\ndata it is meant to represent, including producing a string representation of\nitself.  String representations of data values are especially important in an\ninteractive language such as Python that automatically displays the string\nrepresentation of the values of expressions in an interactive session."
+  },
+  {
+    "type": "p",
+    "content": "String values provide a fundamental medium for communicating information among\nhumans. Sequences of characters can be rendered on a screen, printed to paper,\nread aloud, converted to braille, or broadcast as Morse code.  Strings are also\nfundamental to programming because they can represent Python expressions."
+  },
+  {
+    "type": "p",
+    "content": "Python stipulates that all objects should produce two different string\nrepresentations: one that is human-interpretable text and one that is a\nPython-interpretable expression.  The constructor function for strings,str, returns a human-readable string. Where possible, thereprfunction\nreturns a Python expression that evaluates to an equal object. The docstring\nforreprexplains this property:"
+  },
+  {
+    "type": "p",
+    "content": "The result of callingrepron the value of an expression is what Python\nprints in an interactive session."
+  },
+  {
+    "type": "code",
+    "content": ">>> 12e12\n12000000000000.0\n>>> print(repr(12e12))\n12000000000000.0\n"
+  },
+  {
+    "type": "p",
+    "content": "In cases where no representation exists that evaluates to the original value,\nPython typically produces a description surrounded by angled brackets."
+  },
+  {
+    "type": "code",
+    "content": ">>> repr(min)\n'<built-in function min>'\n"
+  },
+  {
+    "type": "p",
+    "content": "Thestrconstructor often coincides withrepr, but provides a more\ninterpretable text representation in some cases.  For instance, we see a\ndifference betweenstrandreprwith dates."
+  },
+  {
+    "type": "code",
+    "content": ">>> from datetime import date\n>>> tues = date(2011, 9, 12)\n>>> repr(tues)\n'datetime.date(2011, 9, 12)'\n>>> str(tues)\n'2011-09-12'\n"
+  },
+  {
+    "type": "p",
+    "content": "Defining thereprfunction presents a new challenge: we would like it to\napply correctly to all data types, even those that did not exist whenreprwas implemented.  We would like it to be a generic orpolymorphic function,\none that can be applied to many (poly) different forms (morph) of data."
+  },
+  {
+    "type": "p",
+    "content": "The object system provides an elegant solution in this case: thereprfunction always invokes a method called__repr__on its argument."
+  },
+  {
+    "type": "code",
+    "content": ">>> tues.__repr__()\n'datetime.date(2011, 9, 12)'\n"
+  },
+  {
+    "type": "p",
+    "content": "By implementing this same method in user-defined classes, we can extend the\napplicability ofreprto any class we create in the future.  This example\nhighlights another benefit of dot expressions in general, that they provide a\nmechanism for extending the domain of existing functions to new object types."
+  },
+  {
+    "type": "p",
+    "content": "Thestrconstructor is implemented in a similar manner: it invokes a method\ncalled__str__on its argument."
+  },
+  {
+    "type": "code",
+    "content": ">>> tues.__str__()\n'2011-09-12'\n"
+  },
+  {
+    "type": "p",
+    "content": "These polymorphic functions are examples of a more general principle: certain\nfunctions should apply to multiple data types. Moreover, one way to create\nsuch a function is to use a shared attribute name with a different definition\nin each class."
+  },
+  {
+    "type": "h3",
+    "content": "2.7.2   Special Methods"
+  },
+  {
+    "type": "p",
+    "content": "In Python, certainspecial namesare invoked by the Python interpreter in\nspecial circumstances. For instance, the__init__method of a class is\nautomatically invoked whenever an object is constructed. The__str__method\nis invoked automatically when printing, and__repr__is invoked in an\ninteractive session to display values."
+  },
+  {
+    "type": "p",
+    "content": "There are special names for many other behaviors in Python. Some of those used\nmost commonly are described below."
+  },
+  {
+    "type": "p",
+    "content": "True and false values.We saw previously that numbers in Python have a\ntruth value; more specifically, 0 is a false value and all other numbers are\ntrue values. In fact, all objects in Python have a truth value. By default,\nobjects of user-defined classes are considered to be true, but the special__bool__method can be used to override this behavior. If an object defines\nthe__bool__method, then Python calls that method to determine its truth\nvalue."
+  },
+  {
+    "type": "p",
+    "content": "As an example, suppose we want a bank account with 0 balance to be false. We\ncan add a__bool__method to theAccountclass to create this behavior."
+  },
+  {
+    "type": "code",
+    "content": ">>> Account.__bool__ = lambda self: self.balance != 0\n"
+  },
+  {
+    "type": "p",
+    "content": "We can call theboolconstructor to see the truth value of an object, and\nwe can use any object in a boolean context."
+  },
+  {
+    "type": "code",
+    "content": ">>> bool(Account('Jack'))\nFalse\n>>> if not Account('Jack'):\n        print('Jack has nothing')\nJack has nothing\n"
+  },
+  {
+    "type": "p",
+    "content": "Sequence operations.We have seen that we can call thelenfunction to\ndetermine the length of a sequence."
+  },
+  {
+    "type": "code",
+    "content": ">>> len('Go Bears!')\n9\n"
+  },
+  {
+    "type": "p",
+    "content": "Thelenfunction invokes the__len__method of its argument to determine\nits length. All built-in sequence types implement this method."
+  },
+  {
+    "type": "code",
+    "content": ">>> 'Go Bears!'.__len__()\n9\n"
+  },
+  {
+    "type": "p",
+    "content": "Python uses a sequence's length to determine its truth value, if it does not\nprovide a__bool__method. Empty sequences are false, while non-empty\nsequences are true."
+  },
+  {
+    "type": "code",
+    "content": ">>> bool('')\nFalse\n>>> bool([])\nFalse\n>>> bool('Go Bears!')\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "The__getitem__method is invoked by the element selection operator, but it\ncan also be invoked directly."
+  },
+  {
+    "type": "code",
+    "content": ">>> 'Go Bears!'[3]\n'B'\n>>> 'Go Bears!'.__getitem__(3)\n'B'\n"
+  },
+  {
+    "type": "p",
+    "content": "Callable objects.In Python, functions are first-class objects, so they can\nbe passed around as data and have attributes like any other object. Python also\nallows us to define objects that can be \"called\" like functions by including a__call__method. With this method, we can define a class that behaves like\na higher-order function."
+  },
+  {
+    "type": "p",
+    "content": "As an example, consider the following higher-order function, which returns a\nfunction that adds a constant value to its argument."
+  },
+  {
+    "type": "code",
+    "content": ">>> def make_adder(n):\n        def adder(k):\n            return n + k\n        return adder\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> add_three = make_adder(3)\n>>> add_three(4)\n7\n"
+  },
+  {
+    "type": "p",
+    "content": "We can create anAdderclass that defines a__call__method to provide\nthe same functionality."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Adder(object):\n        def __init__(self, n):\n            self.n = n\n        def __call__(self, k):\n            return self.n + k\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> add_three_obj = Adder(3)\n>>> add_three_obj(4)\n7\n"
+  },
+  {
+    "type": "p",
+    "content": "Here, theAdderclass behaves like themake_adderhigher-order\nfunction, and theadd_three_objobject behaves like theadd_threefunction. We have further blurred the line between data and functions."
+  },
+  {
+    "type": "p",
+    "content": "Arithmetic.Special methods can also define the behavior of built-in\noperators applied to user-defined objects. In order to provide this generality,\nPython follows specific protocols to apply each operator. For example, to\nevaluate expressions that contain the+operator, Python checks for special\nmethods on both the left and right operands of the expression. First, Python\nchecks for an__add__method on the value of the left operand, then checks\nfor an__radd__method on the value of the right operand. If either is\nfound, that method is invoked with the value of the other operand as its\nargument. Some examples are given in the following sections. For readers\ninterested in further details, the Python documentation describes the\nexhaustive set ofmethod names for operators.\nDive into Python 3 has a chapter onspecial method namesthat\ndescribes how many of these special method names are used."
+  },
+  {
+    "type": "h3",
+    "content": "2.7.3   Multiple Representations"
+  },
+  {
+    "type": "p",
+    "content": "Abstraction barriers allow us to separate the use and representation of data.\nHowever, in large programs, it may not always make sense to speak of \"the\nunderlying representation\" for a data type in a program. For one thing, there\nmight be more than one useful representation for a data object, and we might\nlike to design systems that can deal with multiple representations."
+  },
+  {
+    "type": "p",
+    "content": "To take a simple example, complex numbers may be represented in two almost\nequivalent ways: in rectangular form (real and imaginary parts) and in polar\nform (magnitude and angle). Sometimes the rectangular form is more appropriate\nand sometimes the polar form is more appropriate. Indeed, it is perfectly\nplausible to imagine a system in which complex numbers are represented in both\nways, and in which the functions for manipulating complex numbers work with\neither representation. We implement such a system below. As a side note, we are\ndeveloping a system that performs arithmetic operations on complex numbers as a\nsimple but unrealistic example of a program that uses generic operations.  Acomplex number typeis actually\nbuilt into Python, but for this example we will implement our own."
+  },
+  {
+    "type": "p",
+    "content": "The idea of allowing for multiple representations of data arises regularly.\nLarge software systems are often designed by many people working over extended\nperiods of time, subject to requirements that change over time. In such an\nenvironment, it is simply not possible for everyone to agree in advance on\nchoices of data representation. In addition to the data-abstraction barriers\nthat isolate representation from use, we need abstraction barriers that isolate\ndifferent design choices from each other and permit different choices to\ncoexist in a single program."
+  },
+  {
+    "type": "p",
+    "content": "We will begin our implementation at the highest level of abstraction and work\ntowards concrete representations. AComplexnumber is aNumber, and\nnumbers can be added or multiplied together. How numbers can be added or\nmultiplied is abstracted by the method namesaddandmul."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Number:\n        def __add__(self, other):\n            return self.add(other)\n        def __mul__(self, other):\n            return self.mul(other)\n"
+  },
+  {
+    "type": "p",
+    "content": "This class requires that Number objects haveaddandmulmethods, but\ndoes not define them. Moreover, it does not have an__init__method. The\npurpose ofNumberis not to be instantiated directly, but instead to serve\nas a superclass of various specific number classes. Our next task is to defineaddandmulappropriately for complex numbers."
+  },
+  {
+    "type": "p",
+    "content": "A complex number can be thought of as a point in two-dimensional space with\ntwo orthogonal axes, the real axis and the imaginary axis.  From this\nperspective, the complex numberc = real + imag * i(wherei * i =-1)\ncan be thought of as the point in the plane whose horizontal coordinate isrealand whose vertical coordinate isimag.  Adding complex numbers\ninvolves adding their respectiverealandimagcoordinates."
+  },
+  {
+    "type": "p",
+    "content": "When multiplying complex numbers, it is more natural to think in terms of\nrepresenting a complex number in polar form, as amagnitudeand anangle.  The product of two complex numbers is the vector obtained by\nstretching one complex number by a factor of the length of the other, and then\nrotating it through the angle of the other."
+  },
+  {
+    "type": "p",
+    "content": "TheComplexclass inherits fromNumberand describes arithmetic for\ncomplex numbers."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Complex(Number):\n        def add(self, other):\n            return ComplexRI(self.real + other.real, self.imag + other.imag)\n        def mul(self, other):\n            magnitude = self.magnitude * other.magnitude\n            return ComplexMA(magnitude, self.angle + other.angle)\n"
+  },
+  {
+    "type": "p",
+    "content": "This implementation assumes that two classes exist for complex numbers,\ncorresponding to their two natural representations:"
+  },
+  {
+    "type": "p",
+    "content": "Interfaces.Object attributes, which are a form of message passing, allows\ndifferent data types to respond to the same message in different ways.  A\nshared set of messages that elicit similar behavior from different classes is a\npowerful method of abstraction. Aninterfaceis a set of shared attribute\nnames, along with a specification of their behavior.   In the case of complex\nnumbers, the interface needed to implement arithmetic consists of four\nattributes:real,imag,magnitude, andangle."
+  },
+  {
+    "type": "p",
+    "content": "For complex arithmetic to be correct, these attributes must be consistent. That\nis, the rectangular coordinates(real, imag)and the polar coordinates(magnitude, angle)must describe the same point on the complex plane.\nTheComplexclass implicitly defines this interface by determining how\nthese attributes are used toaddandmulcomplex numbers."
+  },
+  {
+    "type": "p",
+    "content": "Properties.The requirement that two or more attribute values maintain a\nfixed relationship with each other is a new problem. One solution is to store\nattribute values for only one representation and compute the other\nrepresentation whenever it is needed."
+  },
+  {
+    "type": "p",
+    "content": "Python has a simple feature for computing attributes on the fly from\nzero-argument functions.  The@propertydecorator allows functions to be\ncalled without call expression syntax (parentheses following an expression).\nTheComplexRIclass storesrealandimagattributes and computesmagnitudeandangleon demand."
+  },
+  {
+    "type": "code",
+    "content": ">>> from math import atan2\n>>> class ComplexRI(Complex):\n        def __init__(self, real, imag):\n            self.real = real\n            self.imag = imag\n        @property\n        def magnitude(self):\n            return (self.real ** 2 + self.imag ** 2) ** 0.5\n        @property\n        def angle(self):\n            return atan2(self.imag, self.real)\n        def __repr__(self):\n            return 'ComplexRI({0:g}, {1:g})'.format(self.real, self.imag)\n"
+  },
+  {
+    "type": "p",
+    "content": "As a result of this implementation, all four attributes needed for complex\narithmetic can be accessed without any call expressions, and changes torealorimagare reflected in themagnitudeandangle."
+  },
+  {
+    "type": "code",
+    "content": ">>> ri = ComplexRI(5, 12)\n>>> ri.real\n5\n>>> ri.magnitude\n13.0\n>>> ri.real = 9\n>>> ri.real\n9\n>>> ri.magnitude\n15.0\n"
+  },
+  {
+    "type": "p",
+    "content": "Similarly, theComplexMAclass storesmagnitudeandangle, but\ncomputesrealandimagwhenever those attributes are looked up."
+  },
+  {
+    "type": "code",
+    "content": ">>> from math import sin, cos, pi\n>>> class ComplexMA(Complex):\n        def __init__(self, magnitude, angle):\n            self.magnitude = magnitude\n            self.angle = angle\n        @property\n        def real(self):\n            return self.magnitude * cos(self.angle)\n        @property\n        def imag(self):\n            return self.magnitude * sin(self.angle)\n        def __repr__(self):\n            return 'ComplexMA({0:g}, {1:g} * pi)'.format(self.magnitude, self.angle/pi)\n"
+  },
+  {
+    "type": "p",
+    "content": "Changes to the magnitude or angle are reflected immediately in therealandimagattributes."
+  },
+  {
+    "type": "code",
+    "content": ">>> ma = ComplexMA(2, pi/2)\n>>> ma.imag\n2.0\n>>> ma.angle = pi\n>>> ma.real\n-2.0\n"
+  },
+  {
+    "type": "p",
+    "content": "Our implementation of complex numbers is now complete. Either class\nimplementing complex numbers can be used for either argument in either\narithmetic function inComplex."
+  },
+  {
+    "type": "code",
+    "content": ">>> from math import pi\n>>> ComplexRI(1, 2) + ComplexMA(2, pi/2)\nComplexRI(1, 4)\n>>> ComplexRI(0, 1) * ComplexRI(0, 1)\nComplexMA(1, 1 * pi)\n"
+  },
+  {
+    "type": "p",
+    "content": "The interface approach to encoding multiple representations has appealing\nproperties.  The class for each representation can be developed separately;\nthey must only agree on the names of the attributes they share, as well as any\nbehavior conditions for those attributes.  The interface is alsoadditive.\nIf another programmer wanted to add a third representation of complex numbers\nto the same program, they would only have to create another class with the same\nattributes."
+  },
+  {
+    "type": "p",
+    "content": "Multiple representations of data are closely related to the idea of data\nabstraction with which we began this chapter. Using data abstraction, we were\nable to change the implementation of a data type without changing the meaning\nof the program. With interfaces and message passing, we can have multiple\ndifferent representations within the same program. In both cases, a set of\nnames and corresponding behavior conditions define the abstraction that enables\nthis flexibility."
+  },
+  {
+    "type": "h3",
+    "content": "2.7.4   Generic Functions"
+  },
+  {
+    "type": "p",
+    "content": "Generic functions are methods or functions that apply to arguments of different\ntypes. We have seen many examples already. TheComplex.addmethod is\ngeneric, because it can take either aComplexRIorComplexMAas the\nvalue forother. This flexibility was gained by ensuring that bothComplexRIandComplexMAshare an interface. Using interfaces and\nmessage passing is only one of several methods used to implement generic\nfunctions. We will consider two others in this section: type dispatching and\ntype coercion."
+  },
+  {
+    "type": "p",
+    "content": "Suppose that, in addition to our complex number classes, we implement aRationalclass to represent fractions exactly. Theaddandmulmethods express the same computations as theadd_rationalandmul_rationalfunctions from earlier in the chapter."
+  },
+  {
+    "type": "code",
+    "content": ">>> from fractions import gcd\n>>> class Rational(Number):\n        def __init__(self, numer, denom):\n            g = gcd(numer, denom)\n            self.numer = numer // g\n            self.denom = denom // g\n        def __repr__(self):\n            return 'Rational({0}, {1})'.format(self.numer, self.denom)\n        def add(self, other):\n            nx, dx = self.numer, self.denom\n            ny, dy = other.numer, other.denom\n            return Rational(nx * dy + ny * dx, dx * dy)\n        def mul(self, other):\n            numer = self.numer * other.numer\n            denom = self.denom * other.denom\n            return Rational(numer, denom)\n"
+  },
+  {
+    "type": "p",
+    "content": "We have implemented the interface of theNumbersuperclass by includingaddandmulmethods. As a result, we can add and multiply rational\nnumbers using familiar operators."
+  },
+  {
+    "type": "code",
+    "content": ">>> Rational(2, 5) + Rational(1, 10)\nRational(1, 2)\n>>> Rational(1, 4) * Rational(2, 3)\nRational(1, 6)\n"
+  },
+  {
+    "type": "p",
+    "content": "However, we cannot yet add a rational number to a complex number, although in\nmathematics such a combination is well-defined. We would like to introduce this\ncross-type operation in some carefully controlled way, so that we can support\nit without seriously violating our abstraction barriers.  There is a tension\nbetween the outcomes we desire: we would like to be able to add a complex\nnumber to a rational number, and we would like to do so using a generic__add__method that does the right thing with all numeric types.  At the\nsame time, we would like to separate the concerns of complex numbers and\nrational numbers whenever possible, in order to maintain a modular program."
+  },
+  {
+    "type": "p",
+    "content": "Type dispatching.One way to implement cross-type operations is to select\nbehavior based on the types of the arguments to a function or method.\nThe idea of type dispatching is to write functions that inspect the type\nof arguments they receive, then execute code that is appropriate for\nthose types."
+  },
+  {
+    "type": "p",
+    "content": "The built-in functionisinstancetakes an object and a class. It returns\ntrue if the object has a class that either is or inherits from the given class."
+  },
+  {
+    "type": "code",
+    "content": ">>> c = ComplexRI(1, 1)\n>>> isinstance(c, ComplexRI)\nTrue\n>>> isinstance(c, Complex)\nTrue\n>>> isinstance(c, ComplexMA)\nFalse\n"
+  },
+  {
+    "type": "p",
+    "content": "A simple example of type dispatching is anis_realfunction that uses\na different implementation for each type of complex number."
+  },
+  {
+    "type": "code",
+    "content": ">>> def is_real(c):\n        \"\"\"Return whether c is a real number with no imaginary part.\"\"\"\n        if isinstance(c, ComplexRI):\n            return c.imag == 0\n        elif isinstance(c, ComplexMA):\n            return c.angle % pi == 0\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> is_real(ComplexRI(1, 1))\nFalse\n>>> is_real(ComplexMA(2, pi))\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "Type dispatching is not always performed usingisinstance. For arithmetic,\nwe will give atype_tagattribute toRationalandComplexinstances\nthat has a string value. When two valuesxandyhave the sametype_tag, then we can combine them directly withx.add(y). If not, we\nneed a cross-type operation."
+  },
+  {
+    "type": "code",
+    "content": ">>> Rational.type_tag = 'rat'\n>>> Complex.type_tag = 'com'\n>>> Rational(2, 5).type_tag == Rational(1, 2).type_tag\nTrue\n>>> ComplexRI(1, 1).type_tag == ComplexMA(2, pi/2).type_tag\nTrue\n>>> Rational(2, 5).type_tag == ComplexRI(1, 1).type_tag\nFalse\n"
+  },
+  {
+    "type": "p",
+    "content": "To combine complex and rational numbers, we write functions that rely on both\nof their representations simultaneously. Below, we rely on the fact that aRationalcan be converted approximately to afloatvalue that is a real\nnumber. The result can be combined with a complex number."
+  },
+  {
+    "type": "code",
+    "content": ">>> def add_complex_and_rational(c, r):\n        return ComplexRI(c.real + r.numer/r.denom, c.imag)\n"
+  },
+  {
+    "type": "p",
+    "content": "Multiplication involves a similar conversion. In polar form, a real number in\nthe complex plane always has a positive magnitude. The angle 0 indicates a\npositive number. The anglepiindicates a negative number."
+  },
+  {
+    "type": "code",
+    "content": ">>> def mul_complex_and_rational(c, r):\n        r_magnitude, r_angle = r.numer/r.denom, 0\n        if r_magnitude < 0:\n            r_magnitude, r_angle = -r_magnitude, pi\n        return ComplexMA(c.magnitude * r_magnitude, c.angle + r_angle)\n"
+  },
+  {
+    "type": "p",
+    "content": "Both addition and multiplication are commutative, so swapping the argument\norder can use the same implementations of these cross-type operations."
+  },
+  {
+    "type": "code",
+    "content": ">>> def add_rational_and_complex(r, c):\n        return add_complex_and_rational(c, r)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def mul_rational_and_complex(r, c):\n        return mul_complex_and_rational(c, r)\n"
+  },
+  {
+    "type": "p",
+    "content": "The role of type dispatching is to ensure that these cross-type operations are\nused at appropriate times. Below, we rewrite theNumbersuperclass to use\ntype dispatching for its__add__and__mul__methods."
+  },
+  {
+    "type": "p",
+    "content": "We use thetype_tagattribute to distinguish types of arguments. One could\ndirectly use the built-inisinstancemethod as well, but tags simplify the\nimplementation. Using type tags also illustrates that type dispatching is not\nnecessarily linked to the Python object system, but instead a general technique\nfor creating generic functions over heterogeneous domains."
+  },
+  {
+    "type": "p",
+    "content": "The__add__method considers two cases. First, if two arguments have the\nsame type tag, then it assumes thataddmethod of the first can take\nthe second as an argument. Otherwise, it checks whether a dictionary of\ncross-type implementations, calledadders, contains a function that\ncan add arguments of those type tags. If there is such a function, thecross_applymethod finds and applies it.  The__mul__method has a\nsimilar structure."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Number:\n        def __add__(self, other):\n            if self.type_tag == other.type_tag:\n                return self.add(other)\n            elif (self.type_tag, other.type_tag) in self.adders:\n                return self.cross_apply(other, self.adders)\n        def __mul__(self, other):\n            if self.type_tag == other.type_tag:\n                return self.mul(other)\n            elif (self.type_tag, other.type_tag) in self.multipliers:\n                return self.cross_apply(other, self.multipliers)\n        def cross_apply(self, other, cross_fns):\n            cross_fn = cross_fns[(self.type_tag, other.type_tag)]\n            return cross_fn(self, other)\n        adders = {(\"com\", \"rat\"): add_complex_and_rational,\n                  (\"rat\", \"com\"): add_rational_and_complex}\n        multipliers = {(\"com\", \"rat\"): mul_complex_and_rational,\n                       (\"rat\", \"com\"): mul_rational_and_complex}\n"
+  },
+  {
+    "type": "p",
+    "content": "In this new definition of theNumberclass, all cross-type implementations\nare indexed by pairs of type tags in theaddersandmultipliersdictionaries."
+  },
+  {
+    "type": "p",
+    "content": "This dictionary-based approach to type dispatching is extensible. New\nsubclasses ofNumbercould install themselves into the system by declaring\na type tag and adding cross-type operations toNumber.addersandNumber.multipliers. They could also define their ownaddersandmultipliersin a subclass."
+  },
+  {
+    "type": "p",
+    "content": "While we have introduced some complexity to the system, we can now mix types\nin addition and multiplication expressions."
+  },
+  {
+    "type": "code",
+    "content": ">>> ComplexRI(1.5, 0) + Rational(3, 2)\nComplexRI(3, 0)\n>>> Rational(-1, 2) * ComplexMA(4, pi/2)\nComplexMA(2, 1.5 * pi)\n"
+  },
+  {
+    "type": "p",
+    "content": "Coercion.In the general situation of completely unrelated operations acting\non completely unrelated types, implementing explicit cross-type operations,\ncumbersome though it may be, is the best that one can hope for. Fortunately, we\ncan sometimes do better by taking advantage of additional structure that may be\nlatent in our type system. Often the different data types are not completely\nindependent, and there may be ways by which objects of one type may be viewed\nas being of another type. This process is calledcoercion. For example, if we\nare asked to arithmetically combine a rational number with a complex number, we\ncan view the rational number as a complex number whose imaginary part is\nzero. After doing so, we can useComplex.addandComplex.multo combine\nthem."
+  },
+  {
+    "type": "p",
+    "content": "In general, we can implement this idea by designing coercion functions that\ntransform an object of one type into an equivalent object of another type. Here\nis a typical coercion function, which transforms a rational number to a complex\nnumber with zero imaginary part:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def rational_to_complex(r):\n        return ComplexRI(r.numer/r.denom, 0)\n"
+  },
+  {
+    "type": "p",
+    "content": "The alternative definition of theNumberclass performs cross-type\noperations by attempting to coerce both arguments to the same type.\nThecoercionsdictionary indexes all possible coercions by a pair of type\ntags, indicating that the corresponding value coerces a value of the first type\nto a value of the second type."
+  },
+  {
+    "type": "p",
+    "content": "It is not generally possible to coerce an arbitrary data object of each type\ninto all other types. For example, there is no way to coerce an arbitrary\ncomplex number to a rational number, so there will be no such conversion\nimplementation in thecoercionsdictionary."
+  },
+  {
+    "type": "p",
+    "content": "Thecoercemethod returns two values with the same type tag. It inspects\nthe type tags of its arguments, compares them to entries in thecoercionsdictionary, and converts one argument to the type of the other usingcoerce_to. Only one entry incoercionsis necessary to complete our\ncross-type arithmetic system, replacing the four cross-type functions in the\ntype-dispatching version ofNumber."
+  },
+  {
+    "type": "code",
+    "content": ">>> class Number:\n        def __add__(self, other):\n            x, y = self.coerce(other)\n            return x.add(y)\n        def __mul__(self, other):\n            x, y = self.coerce(other)\n            return x.mul(y)\n        def coerce(self, other):\n            if self.type_tag == other.type_tag:\n                return self, other\n            elif (self.type_tag, other.type_tag) in self.coercions:\n                return (self.coerce_to(other.type_tag), other)\n            elif (other.type_tag, self.type_tag) in self.coercions:\n                return (self, other.coerce_to(self.type_tag))\n        def coerce_to(self, other_tag):\n            coercion_fn = self.coercions[(self.type_tag, other_tag)]\n            return coercion_fn(self)\n        coercions = {('rat', 'com'): rational_to_complex}\n"
+  },
+  {
+    "type": "p",
+    "content": "This coercion scheme has some advantages over the method of defining explicit\ncross-type operations. Although we still need to write coercion functions to\nrelate the types, we need to write only one function for each pair of types\nrather than a different function for each set of types and each generic\noperation. What we are counting on here is the fact that the appropriate\ntransformation between types depends only on the types themselves, not on the\nparticular operation to be applied."
+  },
+  {
+    "type": "p",
+    "content": "Further advantages come from extending coercion.  Some more sophisticated\ncoercion schemes do not just try to coerce one type into another, but instead\nmay try to coerce two different types each into a third common type.  Consider\na rhombus and a rectangle: neither is a special case of the other, but both can\nbe viewed as quadrilaterals. Another extension to coercion is iterative\ncoercion, in which one data type is coerced into another via intermediate\ntypes.  Consider that an integer can be converted into a real number by first\nconverting it into a rational number, then converting that rational number into\na real number. Chaining coercion in this way can reduce the total number of\ncoercion functions that are required by a program."
+  },
+  {
+    "type": "p",
+    "content": "Despite its advantages, coercion does have potential drawbacks.  For one,\ncoercion functions can lose information when they are applied.  In our example,\nrational numbers are exact representations, but become approximations when they\nare converted to complex numbers."
+  },
+  {
+    "type": "p",
+    "content": "Some programming languages have automatic coercion systems built in.  In fact,\nearly versions of Python had a__coerce__special method on objects.  In\nthe end, the complexity of the built-in coercion system did not justify its\nuse, and so it was removed.  Instead, particular operators apply coercion to\ntheir arguments as needed."
+  },
+  {
+    "type": "p",
+    "content": "Continue:2.8 Efficiency"
+  }
+]

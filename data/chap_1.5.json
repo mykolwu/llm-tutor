@@ -1,0 +1,330 @@
+[
+  {
+    "type": "h2",
+    "content": "1.5   Control"
+  },
+  {
+    "type": "p",
+    "content": "The expressive power of the functions that we can define at this point is very\nlimited, because we have not introduced a way to make comparisons and to perform\ndifferent operations depending on the result of a comparison.Control statementswill give us this ability.  They are statements that control the flow of a\nprogram's execution based on the results of logical comparisons."
+  },
+  {
+    "type": "p",
+    "content": "Statements differ fundamentally from the expressions that we have studied so\nfar. They have no value.  Instead of computing something, executing a control\nstatement determines what the interpreter should do next."
+  },
+  {
+    "type": "h3",
+    "content": "1.5.1   Statements"
+  },
+  {
+    "type": "p",
+    "content": "So far, we have primarily considered how to evaluate expressions. However, we\nhave seen three kinds of statements already: assignment,def, andreturnstatements. These lines of Python code are not themselves\nexpressions, although they all contain expressions as components."
+  },
+  {
+    "type": "p",
+    "content": "Rather than being evaluated, statements areexecuted. Each statement\ndescribes some change to the interpreter state, and executing a statement\napplies that change. As we have seen forreturnand assignment statements,\nexecuting statements can involve evaluating subexpressions contained within\nthem."
+  },
+  {
+    "type": "p",
+    "content": "Expressions can also be executed as statements, in which case they are\nevaluated, but their value is discarded. Executing a pure function has no\neffect, but executing a non-pure function can cause effects as a consequence of\nfunction application."
+  },
+  {
+    "type": "p",
+    "content": "Consider, for instance,"
+  },
+  {
+    "type": "code",
+    "content": ">>> def square(x):\n        mul(x, x) # Watch out! This call doesn't return a value.\n"
+  },
+  {
+    "type": "p",
+    "content": "This example is valid Python, but probably not what was intended.  The body of\nthe function consists of an expression.  An expression by itself is a valid\nstatement, but the effect of the statement is that themulfunction is\ncalled, and the result is discarded.  If you want to do something with the\nresult of an expression, you need to say so: you might store it with an\nassignment statement or return it with a return statement:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def square(x):\n        return mul(x, x)\n"
+  },
+  {
+    "type": "p",
+    "content": "Sometimes it does make sense to have a function whose body is an expression,\nwhen a non-pure function likeprintis called."
+  },
+  {
+    "type": "code",
+    "content": ">>> def print_square(x):\n        print(square(x))\n"
+  },
+  {
+    "type": "p",
+    "content": "At its highest level, the Python interpreter's job is to execute programs,\ncomposed of statements. However, much of the interesting work of computation\ncomes from evaluating expressions. Statements govern the relationship among\ndifferent expressions in a program and what happens to their results."
+  },
+  {
+    "type": "h3",
+    "content": "1.5.2   Compound Statements"
+  },
+  {
+    "type": "p",
+    "content": "In general, Python code is a sequence of statements. A simple statement is a\nsingle line that doesn't end in a colon. A compound statement is so called\nbecause it is composed of other statements (simple and compound). Compound\nstatements typically span multiple lines and start with a one-line header ending\nin a colon, which identifies the type of statement. Together, a header and an\nindented suite of statements is called a clause.  A compound statement consists\nof one or more clauses:"
+  },
+  {
+    "type": "p",
+    "content": "We can understand the statements we have already introduced in these terms."
+  },
+  {
+    "type": "p",
+    "content": "Specialized evaluation rules for each kind of header dictate when and if the\nstatements in its suite are executed. We say that the header controls its suite.\nFor example, in the case ofdefstatements, we saw that the return\nexpression is not evaluated immediately, but instead stored for later use when\nthe defined function is eventually called."
+  },
+  {
+    "type": "p",
+    "content": "We can also understand multi-line programs now."
+  },
+  {
+    "type": "p",
+    "content": "This definition exposes the essential structure of a recursively definedsequence: a sequence can be decomposed into its first element and the rest of\nits elements. The \"rest\" of a sequence of statements is itself a sequence of\nstatements!  Thus, we can recursively apply this execution rule. This view of\nsequences as recursive data structures will appear again in later chapters."
+  },
+  {
+    "type": "p",
+    "content": "The important consequence of this rule is that statements are executed in order,\nbut later statements may never be reached, because of redirected control."
+  },
+  {
+    "type": "p",
+    "content": "Practical Guidance.When indenting a suite, all lines must be indented the\nsame amount and in the same way (use spaces, not tabs).  Any variation in\nindentation will cause an error."
+  },
+  {
+    "type": "h3",
+    "content": "1.5.3   Defining Functions II: Local Assignment"
+  },
+  {
+    "type": "p",
+    "content": "Originally, we stated that the body of a user-defined function consisted only\nof areturnstatement with a single return expression. In fact, functions\ncan define a sequence of operations that extends beyond a single expression."
+  },
+  {
+    "type": "p",
+    "content": "Whenever a user-defined function is applied, the sequence of clauses in the\nsuite of its definition is executed in a local environment — an environment\nstarting with a local frame created by calling that function. Areturnstatement redirects control: the process of function application terminates\nwhenever the firstreturnstatement is executed, and the value of thereturnexpression is the returned value of the function being applied."
+  },
+  {
+    "type": "p",
+    "content": "Assignment statements can appear within a function body. For instance, this\nfunction returns the absolute difference between two quantities as a percentage\nof the first, using a two-step calculation:"
+  },
+  {
+    "type": "p",
+    "content": "The effect of an assignment statement is to bind a name to a value in thefirstframe of the current environment. As a consequence, assignment\nstatements within a function body cannot affect the global frame.  The fact\nthat functions can only manipulate their local environment is critical to\ncreatingmodularprograms, in which pure functions interact only via the\nvalues they\ntake and return."
+  },
+  {
+    "type": "p",
+    "content": "Of course, thepercent_differencefunction could be written as a single\nexpression, as shown below, but the return expression is more complex."
+  },
+  {
+    "type": "code",
+    "content": ">>> def percent_difference(x, y):\n        return 100 * abs(x-y) / x\n>>> percent_difference(40, 50)\n25.0\n"
+  },
+  {
+    "type": "p",
+    "content": "So far, local assignment hasn't increased the expressive power of our function\ndefinitions. It will do so, when combined with other control statements. In\naddition, local assignment also plays a critical role in clarifying the meaning\nof complex expressions by assigning names to intermediate quantities."
+  },
+  {
+    "type": "h3",
+    "content": "1.5.4   Conditional Statements"
+  },
+  {
+    "type": "p",
+    "content": "Python has a built-in function for computing absolute values."
+  },
+  {
+    "type": "code",
+    "content": ">>> abs(-2)\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "We would like to be able to implement such a function ourselves, but we have no\nobvious way to define a function that has a comparison and a choice. We would\nlike to express that ifxis positive,abs(x)returnsx.\nFurthermore, ifxis 0,abs(x)returns 0. Otherwise,abs(x)returns-x. In Python, we can express this choice with a conditional statement."
+  },
+  {
+    "type": "p",
+    "content": "This implementation ofabsolute_valueraises several important issues:"
+  },
+  {
+    "type": "p",
+    "content": "Conditional statements. A conditional statement in Python consists of a\nseries of headers and suites: a requiredifclause, an optional sequence ofelifclauses, and finally an optionalelseclause:"
+  },
+  {
+    "type": "p",
+    "content": "When executing a conditional statement, each clause is considered in order. The\ncomputational process of executing a conditional clause follows."
+  },
+  {
+    "type": "p",
+    "content": "If theelseclause is reached (which only happens if allifandelifexpressions evaluate to false values), its suite is executed."
+  },
+  {
+    "type": "p",
+    "content": "Boolean contexts. Above, the execution procedures mention \"a false value\"\nand \"a true value.\" The expressions inside the header statements of conditional\nblocks are said to be inboolean contexts: their truth values matter to\ncontrol flow, but otherwise their values are not assigned or returned.  Python\nincludes several false values, including 0,None, and thebooleanvalueFalse.  All other numbers are true values. In Chapter 2, we will see that\nevery built-in kind of data in Python has both true and false values."
+  },
+  {
+    "type": "p",
+    "content": "Boolean values. Python has two boolean values, calledTrueandFalse. Boolean values represent truth values in logical expressions.  The\nbuilt-in comparison operations,>, <, >=, <=, ==, !=, return these values."
+  },
+  {
+    "type": "code",
+    "content": ">>> 4 < 2\nFalse\n>>> 5 >= 5\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "This second example reads \"5 is greater than or equal to 5\", and corresponds to\nthe functiongein theoperatormodule."
+  },
+  {
+    "type": "code",
+    "content": ">>> 0 == -0\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "This final example reads \"0 equals -0\", and corresponds toeqin theoperatormodule. Notice that Python distinguishes assignment (=) from\nequality comparison (==), a convention shared across many programming\nlanguages."
+  },
+  {
+    "type": "p",
+    "content": "Boolean operators. Three basic logical operators are also built into Python:"
+  },
+  {
+    "type": "code",
+    "content": ">>> True and False\nFalse\n>>> True or False\nTrue\n>>> not False\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "Logical expressions have corresponding evaluation procedures. These procedures\nexploit the fact that the truth value of a logical expression can sometimes be\ndetermined without evaluating all of its subexpressions, a feature calledshort-circuiting."
+  },
+  {
+    "type": "p",
+    "content": "To evaluate the expression<left> and <right>:"
+  },
+  {
+    "type": "p",
+    "content": "To evaluate the expression<left> or <right>:"
+  },
+  {
+    "type": "p",
+    "content": "To evaluate the expressionnot <exp>:"
+  },
+  {
+    "type": "p",
+    "content": "These values, rules, and operators provide us with a way to combine the results\nof comparisons.  Functions that perform comparisons and return boolean values\ntypically begin withis, not followed by an underscore (e.g.,isfinite,isdigit,isinstance, etc.)."
+  },
+  {
+    "type": "h3",
+    "content": "1.5.5   Iteration"
+  },
+  {
+    "type": "p",
+    "content": "In addition to selecting which statements to execute, control statements are\nused to express repetition. If each line of code we wrote were only executed once,\nprogramming would be a very unproductive exercise. Only through repeated\nexecution of statements do we unlock the full potential of computers. We have\nalready seen one form of repetition: a function can be applied many times,\nalthough it is only defined once. Iterative control structures are another\nmechanism for executing the same statements many times."
+  },
+  {
+    "type": "p",
+    "content": "Consider the sequence of Fibonacci numbers, in which each number is the sum of\nthe preceding two:"
+  },
+  {
+    "type": "p",
+    "content": "Each value is constructed by repeatedly applying the sum-previous-two rule. The\nfirst and second are fixed to 0 and 1.  For instance, the eighth Fibonacci\nnumber is 13."
+  },
+  {
+    "type": "p",
+    "content": "We can use awhilestatement to enumeratenFibonacci numbers.  We need\nto track how many values we've created (k), along with the kth value\n(curr) and its predecessor (pred). Step through this function and\nobserve how the Fibonacci numbers evolve one by one, bound tocurr."
+  },
+  {
+    "type": "p",
+    "content": "Remember that commas seperate multiple names and values in an assignment\nstatement.  The line:"
+  },
+  {
+    "type": "p",
+    "content": "has the effect of rebinding the namepredto the value ofcurr, and\nsimultanously rebindingcurrto the value ofpred + curr.  All of the\nexpressions to the right of=are evaluated before any rebinding takes\nplace."
+  },
+  {
+    "type": "p",
+    "content": "This order of events -- evaluating everything on the right of=before\nupdating any bindings on the left -- is essential for correctness of this\nfunction."
+  },
+  {
+    "type": "p",
+    "content": "Awhileclause contains a header expression followed by a suite:"
+  },
+  {
+    "type": "p",
+    "content": "To execute awhileclause:"
+  },
+  {
+    "type": "p",
+    "content": "In step 2, the entire suite of thewhileclause is executed before the\nheader expression is evaluated again."
+  },
+  {
+    "type": "p",
+    "content": "In order to prevent the suite of awhileclause from being executed\nindefinitely, the suite should always change some binding in each pass."
+  },
+  {
+    "type": "p",
+    "content": "Awhilestatement that does not terminate is called an infinite loop.\nPress<Control>-Cto force Python to stop looping."
+  },
+  {
+    "type": "h3",
+    "content": "1.5.6   Testing"
+  },
+  {
+    "type": "p",
+    "content": "Testinga function is the act of verifying that the function's behavior\nmatches expectations. Our language of functions is now sufficiently complex\nthat we need to start testing our implementations."
+  },
+  {
+    "type": "p",
+    "content": "Atestis a mechanism for systematically performing this verification.  Tests\ntypically take the form of another function that contains one or more sample\ncalls to the function being tested. The returned value is then verified against\nan expected result. Unlike most functions, which are meant to be general, tests\ninvolve selecting and validating calls with specific argument values.  Tests\nalso serve as documentation: they demonstrate how to call a function and what\nargument values are appropriate."
+  },
+  {
+    "type": "p",
+    "content": "Assertions.Programmers useassertstatements to verify expectations,\nsuch as the output of a function being tested. Anassertstatement has an\nexpression in a boolean context, followed by a quoted line of text (single or\ndouble quotes are both fine, but be consistent) that will be displayed if the\nexpression evaluates to a false value."
+  },
+  {
+    "type": "code",
+    "content": ">>> assert fib(8) == 13, 'The 8th Fibonacci number should be 13'\n"
+  },
+  {
+    "type": "p",
+    "content": "When the expression being asserted evaluates to a true value, executing an\nassert statement has no effect. When it is a false value,assertcauses an\nerror that halts execution."
+  },
+  {
+    "type": "p",
+    "content": "A test function forfibshould test several arguments, including extreme\nvalues ofn."
+  },
+  {
+    "type": "code",
+    "content": ">>> def fib_test():\n        assert fib(2) == 1, 'The 2nd Fibonacci number should be 1'\n        assert fib(3) == 1, 'The 3rd Fibonacci number should be 1'\n        assert fib(50) == 7778742049, 'Error at the 50th Fibonacci number'\n"
+  },
+  {
+    "type": "p",
+    "content": "When writing Python in files, rather than directly into the interpreter, tests\nare typically written in the same file or a neighboring file with the suffix_test.py."
+  },
+  {
+    "type": "p",
+    "content": "Doctests.Python provides a convenient method for placing simple tests\ndirectly in the docstring of a function. The first line of a docstring should\ncontain a one-line description of the function, followed by a blank line.  A\ndetailed description of arguments and behavior may follow. In addition, the\ndocstring may include a sample interactive session that calls the function:"
+  },
+  {
+    "type": "p",
+    "content": "Then, the interaction can be verified via thedoctest module. Below, theglobalsfunction returns a representation of the global environment, which\nthe interpreter needs in order to evaluate expressions."
+  },
+  {
+    "type": "code",
+    "content": ">>> from doctest import testmod\n>>> testmod()\nTestResults(failed=0, attempted=2)\n"
+  },
+  {
+    "type": "p",
+    "content": "To verify the doctest interactions for only a single function, we use adoctestfunction calledrun_docstring_examples.  This function is\n(unfortunately) a bit complicated to call.  Its first argument is the function\nto test.  The second should always be the result of the expressionglobals(), a built-in function that returns the global environment.  The\nthird argument isTrueto indicate that we would like \"verbose\" output: a\ncatalog of all tests run."
+  },
+  {
+    "type": "code",
+    "content": ">>> from doctest import run_docstring_examples\n>>> run_docstring_examples(sum_naturals, globals(), True)\nFinding tests in NoName\nTrying:\n    sum_naturals(10)\nExpecting:\n    55\nok\nTrying:\n    sum_naturals(100)\nExpecting:\n    5050\nok\n"
+  },
+  {
+    "type": "p",
+    "content": "When the return value of a function does not match the expected result, therun_docstring_examplesfunction will report this problem as a test failure."
+  },
+  {
+    "type": "p",
+    "content": "When writing Python in files, all doctests in a file can be run by starting\nPython with the doctest command line option:"
+  },
+  {
+    "type": "p",
+    "content": "The key to effective testing is to write (and run) tests immediately after\nimplementing new functions. It is even good practice to write some tests before\nyou implement, in order to have some example inputs and outputs in your mind.\nA test that applies a single function is called aunit test.  Exhaustive unit\ntesting is a hallmark of good program design."
+  },
+  {
+    "type": "p",
+    "content": "Continue:1.6 Higher-Order Functions"
+  }
+]

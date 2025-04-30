@@ -1,0 +1,750 @@
+[
+  {
+    "type": "h2",
+    "content": "2.3   Sequences"
+  },
+  {
+    "type": "p",
+    "content": "A sequence is an ordered collection of values. The sequence is a powerful,\nfundamental abstraction in computer science. Sequences are not instances of a\nparticular built-in type or abstract data representation, but instead a\ncollection of behaviors that are shared among several different types of data.\nThat is, there are many kinds of sequences, but they all share common behavior.\nIn particular,"
+  },
+  {
+    "type": "p",
+    "content": "Length.A sequence has a finite length. An empty sequence has length 0."
+  },
+  {
+    "type": "p",
+    "content": "Element selection.A sequence has an element corresponding to any\nnon-negative integer index less than its length, starting at 0 for the first\nelement."
+  },
+  {
+    "type": "p",
+    "content": "Python includes several native data types that are sequences, the most\nimportant of which is thelist."
+  },
+  {
+    "type": "h3",
+    "content": "2.3.1   Lists"
+  },
+  {
+    "type": "p",
+    "content": "Alistvalue is a sequence that can have arbitrary length.  Lists have a\nlarge set of built-in behaviors, along with specific syntax to express those\nbehaviors. We have already seen the list literal, which evaluates to alistinstance, as well as an element selection expression that evaluates to a value\nin the list. The built-inlenfunction returns the length of a sequence.\nBelow,digitsis a list with four elements. The element at index 3 is 8."
+  },
+  {
+    "type": "code",
+    "content": ">>> digits = [1, 8, 2, 8]\n>>> len(digits)\n4\n>>> digits[3]\n8\n"
+  },
+  {
+    "type": "p",
+    "content": "Additionally, lists can be added together and multiplied by integers.  For\nsequences, addition and multiplication do not add or multiply elements, but\ninstead combine and replicate the sequences themselves. That is, theaddfunction in theoperatormodule (and the+operator) yields a list that\nis the concatenation of the added arguments.  Themulfunction inoperator(and the*operator) can take a list and an integerkto\nreturn the list that consists ofkrepetitions of the original list."
+  },
+  {
+    "type": "code",
+    "content": ">>> [2, 7] + digits * 2\n[2, 7, 1, 8, 2, 8, 1, 8, 2, 8]\n"
+  },
+  {
+    "type": "p",
+    "content": "Any values can be included in a list, including another list. Element selection\ncan be applied multiple times in order to select a deeply nested element in a\nlist containing lists."
+  },
+  {
+    "type": "code",
+    "content": ">>> pairs = [[10, 20], [30, 40]]\n>>> pairs[1]\n[30, 40]\n>>> pairs[1][0]\n30\n"
+  },
+  {
+    "type": "h3",
+    "content": "2.3.2   Sequence Iteration"
+  },
+  {
+    "type": "p",
+    "content": "In many cases, we would like to iterate over the elements of a sequence and\nperform some computation for each element in turn.  This pattern is so common\nthat Python has an additional control statement to process sequential data: theforstatement."
+  },
+  {
+    "type": "p",
+    "content": "Consider the problem of counting how many times a value appears in a sequence.\nWe can implement a function to compute this count using awhileloop."
+  },
+  {
+    "type": "code",
+    "content": ">>> def count(s, value):\n        \"\"\"Count the number of occurrences of value in sequence s.\"\"\"\n        total, index = 0, 0\n        while index < len(s):\n            if s[index] == value:\n                total = total + 1\n            index = index + 1\n        return total\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> count(digits, 8)\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "The Pythonforstatement can simplify this function body by iterating over\nthe element values directly without introducing the nameindexat all."
+  },
+  {
+    "type": "code",
+    "content": ">>> def count(s, value):\n        \"\"\"Count the number of occurrences of value in sequence s.\"\"\"\n        total = 0\n        for elem in s:\n            if elem == value:\n                total = total + 1\n        return total\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> count(digits, 8)\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "Aforstatement consists of a single clause with the form:"
+  },
+  {
+    "type": "p",
+    "content": "Aforstatement is executed by the following procedure:"
+  },
+  {
+    "type": "p",
+    "content": "This execution procedure refers toiterable values. Lists are a type of\nsequence, and sequences are iterable values. Their elements are considered\nin their sequential order.  Python includes other iterable types, but we will\nfocus on sequences for now; the general definition of the term \"iterable\"\nappears in the section on iterators in Chapter 4."
+  },
+  {
+    "type": "p",
+    "content": "An important consequence of this evaluation procedure is that<name>will be\nbound to the last element of the sequence after theforstatement is\nexecuted.  Theforloop introduces yet another way in which the\nenvironment can be updated by a statement."
+  },
+  {
+    "type": "p",
+    "content": "Sequence unpacking.A common pattern in programs is to have a sequence of\nelements that are themselves sequences, but all of a fixed length. Aforstatement may include multiple names in its header to \"unpack\" each element\nsequence into its respective elements.  For example, we may have a list of\ntwo-element lists."
+  },
+  {
+    "type": "code",
+    "content": ">>> pairs = [[1, 2], [2, 2], [2, 3], [4, 4]]\n"
+  },
+  {
+    "type": "p",
+    "content": "and wish to find the number of these pairs that have the same first and second\nelement."
+  },
+  {
+    "type": "code",
+    "content": ">>> same_count = 0\n"
+  },
+  {
+    "type": "p",
+    "content": "The followingforstatement with two names in its header will bind each namexandyto the first and second elements in each pair, respectively."
+  },
+  {
+    "type": "code",
+    "content": ">>> for x, y in pairs:\n        if x == y:\n            same_count = same_count + 1\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> same_count\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "This pattern of binding multiple names to multiple values in a fixed-length\nsequence is calledsequence unpacking; it is the same pattern that we see in\nassignment statements that bind multiple names to multiple values."
+  },
+  {
+    "type": "p",
+    "content": "Ranges.Arangeis another built-in type of sequence in Python, which\nrepresents a range of integers.  Ranges are created withrange, which takes\ntwo integer arguments: the first number and one beyond the last number in the\ndesired range."
+  },
+  {
+    "type": "code",
+    "content": ">>> range(1, 10)  # Includes 1, but not 10\nrange(1, 10)\n"
+  },
+  {
+    "type": "p",
+    "content": "Calling thelistconstructor on a range evaluates to a list with the same\nelements as the range, so that the elements can be easily inspected."
+  },
+  {
+    "type": "code",
+    "content": ">>> list(range(5, 8))\n[5, 6, 7]\n"
+  },
+  {
+    "type": "p",
+    "content": "If only one argument is given, it is interpreted as one beyond the last value\nfor a range that starts at 0."
+  },
+  {
+    "type": "code",
+    "content": ">>> list(range(4))\n[0, 1, 2, 3]\n"
+  },
+  {
+    "type": "p",
+    "content": "Ranges commonly appear as the expression in aforheader to specify the\nnumber of times that the suite should be executed: A common convention is to\nuse a single underscore character for the name in theforheader if the\nname is unused in the suite:"
+  },
+  {
+    "type": "p",
+    "content": "This underscore is just another name in the environment as far as the\ninterpreter is concerned, but has a conventional meaning among programmers that\nindicates the name will not appear in any future expressions."
+  },
+  {
+    "type": "h3",
+    "content": "2.3.3   Sequence Processing"
+  },
+  {
+    "type": "p",
+    "content": "Sequences are such a common form of compound data that whole programs are often\norganized around this single abstraction.  Modular components that have\nsequences as both inputs and outputs can be mixed and matched to perform data\nprocessing. Complex components can be defined by chaining together a pipeline\nof sequence processing operations, each of which is simple and focused."
+  },
+  {
+    "type": "p",
+    "content": "List Comprehensions.Many sequence processing operations can be expressed\nby evaluating a fixed expression for each element in a sequence and collecting\nthe resulting values in a result sequence. In Python, a list comprehension is\nan expression that performs such a computation."
+  },
+  {
+    "type": "code",
+    "content": ">>> odds = [1, 3, 5, 7, 9]\n>>> [x+1 for x in odds]\n[2, 4, 6, 8, 10]\n"
+  },
+  {
+    "type": "p",
+    "content": "Theforkeyword above is not part of aforstatement, but instead part\nof a list comprehension because it is contained within square brackets.\nThe sub-expressionx+1is evaluated withxbound to each element ofoddsin turn, and the resulting values are collected into a list."
+  },
+  {
+    "type": "p",
+    "content": "Another common sequence processing operation is to select a subset of values\nthat satisfy some condition. List comprehensions can also express this pattern,\nfor instance selecting all elements ofoddsthat evenly divide25."
+  },
+  {
+    "type": "code",
+    "content": ">>> [x for x in odds if 25 % x == 0]\n[1, 5]\n"
+  },
+  {
+    "type": "p",
+    "content": "The general form of a list comprehension is:"
+  },
+  {
+    "type": "p",
+    "content": "To evaluate a list comprehension, Python evaluates the<sequence\nexpression>, which must return an iterable value.  Then, for each element in\norder, the element value is bound to<name>, the filter expression is\nevaluated, and if it yields a true value, the map expression is evaluated. The\nvalues of the map expression are collected into a list."
+  },
+  {
+    "type": "p",
+    "content": "Aggregation.A third common pattern in sequence processing is to aggregate\nall values in a sequence into a single value. The built-in functionssum,min, andmaxare all examples of aggregation functions."
+  },
+  {
+    "type": "p",
+    "content": "By combining the patterns of evaluating an expression for each element,\nselecting a subset of elements, and aggregating elements, we can solve problems\nusing a sequence processing approach."
+  },
+  {
+    "type": "p",
+    "content": "A perfect number is a positive integer that is equal to the sum of its\ndivisors. The divisors ofnare positive integers less thannthat\ndivide evenly inton. Listing the divisors ofncan be expressed with a\nlist comprehension."
+  },
+  {
+    "type": "code",
+    "content": ">>> def divisors(n):\n        return [1] + [x for x in range(2, n) if n % x == 0]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> divisors(4)\n[1, 2]\n>>> divisors(12)\n[1, 2, 3, 4, 6]\n"
+  },
+  {
+    "type": "p",
+    "content": "Usingdivisors, we can compute all perfect numbers from 1 to 1000 with\nanother list comprehension. (1 is typically considered to be a perfect number\nas well, but it does not qualify under our definition ofdivisors.)"
+  },
+  {
+    "type": "code",
+    "content": ">>> [n for n in range(1, 1000) if sum(divisors(n)) == n]\n[6, 28, 496]\n"
+  },
+  {
+    "type": "p",
+    "content": "We can reuse our definition ofdivisorsto solve another problem, finding\nthe minimum perimeter of a rectangle with integer side lengths, given its area.\nThe area of a rectangle is its height times its width. Therefore, given the\narea and height, we can compute the width. We can assert that both the width\nand height evenly divide the area to ensure that the side lengths are integers."
+  },
+  {
+    "type": "code",
+    "content": ">>> def width(area, height):\n        assert area % height == 0\n        return area // height\n"
+  },
+  {
+    "type": "p",
+    "content": "The perimeter of a rectangle is the sum of its side lengths."
+  },
+  {
+    "type": "code",
+    "content": ">>> def perimeter(width, height):\n        return 2 * width + 2 * height\n"
+  },
+  {
+    "type": "p",
+    "content": "The height of a rectangle with integer side lengths must be a divisor of its\narea. We can compute the minimum perimeter by considering all heights."
+  },
+  {
+    "type": "code",
+    "content": ">>> def minimum_perimeter(area):\n        heights = divisors(area)\n        perimeters = [perimeter(width(area, h), h) for h in heights]\n        return min(perimeters)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> area = 80\n>>> width(area, 5)\n16\n>>> perimeter(16, 5)\n42\n>>> perimeter(10, 8)\n36\n>>> minimum_perimeter(area)\n36\n>>> [minimum_perimeter(n) for n in range(1, 10)]\n[4, 6, 8, 8, 12, 10, 16, 12, 12]\n"
+  },
+  {
+    "type": "p",
+    "content": "Higher-Order Functions.The common patterns we have observed in sequence\nprocessing can be expressed using higher-order functions. First, evaluating an\nexpression for each element in a sequence can be expressed by applying a\nfunction to each element."
+  },
+  {
+    "type": "code",
+    "content": ">>> def apply_to_all(map_fn, s):\n        return [map_fn(x) for x in s]\n"
+  },
+  {
+    "type": "p",
+    "content": "Selecting only elements for which some expression is true can be expressed by\napplying a function to each element."
+  },
+  {
+    "type": "code",
+    "content": ">>> def keep_if(filter_fn, s):\n        return [x for x in s if filter_fn(x)]\n"
+  },
+  {
+    "type": "p",
+    "content": "Finally, many forms of aggregation can be expressed as repeatedly applying a\ntwo-argument function to thereducedvalue so far and each element in turn."
+  },
+  {
+    "type": "code",
+    "content": ">>> def reduce(reduce_fn, s, initial):\n        reduced = initial\n        for x in s:\n            reduced = reduce_fn(reduced, x)\n        return reduced\n"
+  },
+  {
+    "type": "p",
+    "content": "For example,reducecan be used to multiply together all elements of a\nsequence. Usingmulas thereduce_fnand 1 as theinitialvalue,reducecan be used to multiply together a sequence of numbers."
+  },
+  {
+    "type": "code",
+    "content": ">>> reduce(mul, [2, 4, 8], 1)\n64\n"
+  },
+  {
+    "type": "p",
+    "content": "We can find perfect numbers using these higher-order functions as well."
+  },
+  {
+    "type": "code",
+    "content": ">>> def divisors_of(n):\n        divides_n = lambda x: n % x == 0\n        return [1] + keep_if(divides_n, range(2, n))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> divisors_of(12)\n[1, 2, 3, 4, 6]\n>>> from operator import add\n>>> def sum_of_divisors(n):\n        return reduce(add, divisors_of(n), 0)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def perfect(n):\n        return sum_of_divisors(n) == n\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> keep_if(perfect, range(1, 1000))\n[1, 6, 28, 496]\n"
+  },
+  {
+    "type": "p",
+    "content": "Conventional Names.In the computer science community, the more common\nname forapply_to_allismapand the more common name forkeep_ifisfilter. In Python, the built-inmapandfilterare\ngeneralizations of these functions that do not return lists. These functions\nare discussed in Chapter 4. The definitions above are equivalent to applying\nthelistconstructor to the result of built-inmapandfiltercalls."
+  },
+  {
+    "type": "code",
+    "content": ">>> apply_to_all = lambda map_fn, s: list(map(map_fn, s))\n>>> keep_if = lambda filter_fn, s: list(filter(filter_fn, s))\n"
+  },
+  {
+    "type": "p",
+    "content": "Thereducefunction is built into thefunctoolsmodule of the Python\nstandard library. In this version, theinitialargument is optional."
+  },
+  {
+    "type": "code",
+    "content": ">>> from functools import reduce\n>>> from operator import mul\n>>> def product(s):\n        return reduce(mul, s)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> product([1, 2, 3, 4, 5])\n120\n"
+  },
+  {
+    "type": "p",
+    "content": "In Python programs, it is more common to use list comprehensions directly\nrather than higher-order functions, but both approaches to sequence processing\nare widely used."
+  },
+  {
+    "type": "h3",
+    "content": "2.3.4   Sequence Abstraction"
+  },
+  {
+    "type": "p",
+    "content": "We have introduced two native data types that satisfy the sequence abstraction:\nlists and ranges.  Both satisfy the conditions with which we began this\nsection: length and element selection.  Python includes two more behaviors\nof sequence types that extend the sequence abstraction."
+  },
+  {
+    "type": "p",
+    "content": "Membership.A value can be tested for membership in a sequence.  Python has\ntwo operatorsinandnot inthat evaluate toTrueorFalsedepending on whether an element appears in a sequence."
+  },
+  {
+    "type": "code",
+    "content": ">>> digits\n[1, 8, 2, 8]\n>>> 2 in digits\nTrue\n>>> 1828 not in digits\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "Slicing.Sequences contain smaller sequences within them.  Asliceof a\nsequence is any contiguous span of the original sequence, designated by a pair\nof integers. As with therangeconstructor, the first integer indicates the\nstarting index of the slice and the second indicates one beyond the ending\nindex."
+  },
+  {
+    "type": "p",
+    "content": "In Python, sequence slicing is expressed similarly to element selection, using\nsquare brackets.  A colon separates the starting and ending indices.  Any bound\nthat is omitted is assumed to be an extreme value: 0 for the starting index,\nand the length of the sequence for the ending index."
+  },
+  {
+    "type": "code",
+    "content": ">>> digits[0:2]\n[1, 8]\n>>> digits[1:]\n[8, 2, 8]\n"
+  },
+  {
+    "type": "p",
+    "content": "Enumerating these additional behaviors of the Python sequence abstraction gives\nus an opportunity to reflect upon what constitutes a useful data abstraction in\ngeneral.  The richness of an abstraction (that is, how many behaviors it\nincludes) has consequences.  For users of an abstraction, additional behaviors\ncan be helpful.  On the other hand, satisfying the requirements of a rich\nabstraction with a new data type can be challenging. Another negative\nconsequence of rich abstractions is that they take longer for users to learn."
+  },
+  {
+    "type": "p",
+    "content": "Sequences have a rich abstraction because they are so ubiquitous in computing\nthat learning a few complex behaviors is justified.  In general, most\nuser-defined abstractions should be kept as simple as possible."
+  },
+  {
+    "type": "p",
+    "content": "Further reading.Slice notation admits a variety of special cases, such as\nnegative starting values, ending values, and step sizes.  A complete description\nappears in the subsection calledslicing a listin Dive Into Python 3.  In this chapter, we will only use the basic features\ndescribed above."
+  },
+  {
+    "type": "h3",
+    "content": "2.3.5   Strings"
+  },
+  {
+    "type": "p",
+    "content": "Text values are perhaps more fundamental to computer science than even numbers.\nAs a case in point, Python programs are written and stored as text.  The native\ndata type for text in Python is called a string, and corresponds to the\nconstructorstr."
+  },
+  {
+    "type": "p",
+    "content": "There are many details of how strings are represented, expressed, and\nmanipulated in Python. Strings are another example of a rich abstraction, one\nthat requires a substantial commitment on the part of the programmer to master.\nThis section serves as a condensed introduction to essential string behaviors."
+  },
+  {
+    "type": "p",
+    "content": "String literals can express arbitrary text, surrounded by either single or\ndouble quotation marks."
+  },
+  {
+    "type": "code",
+    "content": ">>> 'I am string!'\n'I am string!'\n>>> \"I've got an apostrophe\"\n\"I've got an apostrophe\"\n>>> '您好'\n'您好'\n"
+  },
+  {
+    "type": "p",
+    "content": "We have seen strings already in our code, as docstrings, in calls toprint,\nand as error messages inassertstatements."
+  },
+  {
+    "type": "p",
+    "content": "Strings satisfy the two basic conditions of a sequence that we introduced at the\nbeginning of this section: they have a length and they support element\nselection."
+  },
+  {
+    "type": "code",
+    "content": ">>> city = 'Berkeley'\n>>> len(city)\n8\n>>> city[3]\n'k'\n"
+  },
+  {
+    "type": "p",
+    "content": "The elements of a string are themselves strings that have only a single\ncharacter.  A character is any single letter of the alphabet, punctuation\nmark, or other symbol.  Unlike many other programming languages, Python does\nnot have a separate character type; any text is a string, and strings that\nrepresent single characters have a length of 1."
+  },
+  {
+    "type": "p",
+    "content": "Like lists, strings can also be combined via addition and multiplication."
+  },
+  {
+    "type": "code",
+    "content": ">>> 'Berkeley' + ', CA'\n'Berkeley, CA'\n>>> 'Shabu ' * 2\n'Shabu Shabu '\n"
+  },
+  {
+    "type": "p",
+    "content": "Membership.The behavior of strings diverges from other sequence\ntypes in Python.  The string abstraction does not conform to the full sequence\nabstraction that we described for lists and ranges.  In particular, the\nmembership operatorinapplies to strings, but has an entirely different\nbehavior than when it is applied to sequences.  It matches substrings rather\nthan elements."
+  },
+  {
+    "type": "code",
+    "content": ">>> 'here' in \"Where's Waldo?\"\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "Multiline Literals.Strings aren't limited to a single line. Triple quotes\ndelimit string literals that span multiple lines.  We have used this triple\nquoting extensively already for docstrings."
+  },
+  {
+    "type": "code",
+    "content": ">>> \"\"\"The Zen of Python\nclaims, Readability counts.\nRead more: import this.\"\"\"\n'The Zen of Python\\nclaims, \"Readability counts.\"\\nRead more: import this.'\n"
+  },
+  {
+    "type": "p",
+    "content": "In the printed result above, the\\n(pronounced \"backslash en\") is a\nsingle element that represents a new line.  Although it appears as two\ncharacters (backslash and \"n\"), it is considered a single character for the\npurposes of length and element selection."
+  },
+  {
+    "type": "p",
+    "content": "String Coercion.A string can be created from any object in Python by\ncalling thestrconstructor function with an object value as its argument.\nThis feature of strings is useful for constructing descriptive strings from\nobjects of various types."
+  },
+  {
+    "type": "code",
+    "content": ">>> str(2) + ' is an element of ' + str(digits)\n'2 is an element of [1, 8, 2, 8]'\n"
+  },
+  {
+    "type": "p",
+    "content": "Further reading.Encoding text in computers is a complex topic.  In this\nchapter, we will abstract away the details of how strings are represented.\nHowever, for many applications, the particular details of how strings are\nencoded by computers is essential knowledge.The strings chapter of Dive Into\nPython 3provides a\ndescription of character encodings and Unicode."
+  },
+  {
+    "type": "h3",
+    "content": "2.3.6   Trees"
+  },
+  {
+    "type": "p",
+    "content": "Our ability to use lists as the elements of other lists provides a new means of\ncombination in our programming language.  This ability is called aclosure\npropertyof a data type.  In general, a method for combining data values\nhas a closure property if the result of combination can itself be combined\nusing the same method.  Closure is the key to power in any means of combination\nbecause it permits us to create hierarchical structures — structures made up of\nparts, which themselves are made up of parts, and so on."
+  },
+  {
+    "type": "p",
+    "content": "We can visualize lists in environment diagrams usingbox-and-pointernotation. A list is depicted as adjacent boxes that contain the elements of the\nlist. Primitive values such as numbers, strings, boolean values, andNoneappear within an element box.  Composite values, such as function values and\nother lists, are indicated by an arrow."
+  },
+  {
+    "type": "p",
+    "content": "Nesting lists within lists can introduce complexity. Thetreeis a\nfundamental data abstraction that imposes regularity on how hierarchical values\nare structured and manipulated."
+  },
+  {
+    "type": "p",
+    "content": "A tree has a root label and a sequence of branches. Each branch of a tree is a\ntree. A tree with no branches is called a leaf. Any tree contained within a\ntree is called a sub-tree of that tree (such as a branch of a branch). The root\nof each sub-tree of a tree is called a node in that tree."
+  },
+  {
+    "type": "p",
+    "content": "The data abstraction for a tree consists of the constructortreeand the\nselectorslabelandbranches. We begin with a simplified version."
+  },
+  {
+    "type": "code",
+    "content": ">>> def tree(root_label, branches=[]):\n        for branch in branches:\n            assert is_tree(branch), 'branches must be trees'\n        return [root_label] + list(branches)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def label(tree):\n        return tree[0]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def branches(tree):\n        return tree[1:]\n"
+  },
+  {
+    "type": "p",
+    "content": "A tree is well-formed only if it has a root label and all branches are also\ntrees. Theis_treefunction is applied in thetreeconstructor to\nverify that all branches are well-formed."
+  },
+  {
+    "type": "code",
+    "content": ">>> def is_tree(tree):\n        if type(tree) != list or len(tree) < 1:\n            return False\n        for branch in branches(tree):\n            if not is_tree(branch):\n                return False\n        return True\n"
+  },
+  {
+    "type": "p",
+    "content": "Theis_leaffunction checks whether or not a tree has branches."
+  },
+  {
+    "type": "code",
+    "content": ">>> def is_leaf(tree):\n        return not branches(tree)\n"
+  },
+  {
+    "type": "p",
+    "content": "Trees can be constructed by nested expressions. The following treethas\nroot label 3 and two branches."
+  },
+  {
+    "type": "code",
+    "content": ">>> t = tree(3, [tree(1), tree(2, [tree(1), tree(1)])])\n>>> t\n[3, [1], [2, [1], [1]]]\n>>> label(t)\n3\n>>> branches(t)\n[[1], [2, [1], [1]]]\n>>> label(branches(t)[1])\n2\n>>> is_leaf(t)\nFalse\n>>> is_leaf(branches(t)[0])\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "Tree-recursive functions can be used to construct trees. For example, the nth\nFibonacci tree has a root label of the nth Fibonacci number and, forn > 1,\ntwo branches that are also Fibonacci trees. A Fibonacci tree illustrates the\ntree-recursive computation of a Fibonacci number."
+  },
+  {
+    "type": "code",
+    "content": ">>> def fib_tree(n):\n        if n == 0 or n == 1:\n            return tree(n)\n        else:\n            left, right = fib_tree(n-2), fib_tree(n-1)\n            fib_n = label(left) + label(right)\n            return tree(fib_n, [left, right])\n>>> fib_tree(5)\n[5, [2, [1], [1, [0], [1]]], [3, [1, [0], [1]], [2, [1], [1, [0], [1]]]]]\n"
+  },
+  {
+    "type": "p",
+    "content": "Tree-recursive functions are also used to process trees. For example, thecount_leavesfunction counts the leaves of a tree."
+  },
+  {
+    "type": "code",
+    "content": ">>> def count_leaves(tree):\n      if is_leaf(tree):\n          return 1\n      else:\n          branch_counts = [count_leaves(b) for b in branches(tree)]\n          return sum(branch_counts)\n>>> count_leaves(fib_tree(5))\n8\n"
+  },
+  {
+    "type": "p",
+    "content": "Partition trees.Trees can also be used to represent the partitions of an\ninteger. A partition tree fornusing parts up to sizemis a binary\n(two branch) tree that represents the choices taken during computation. In a\nnon-leaf partition tree:"
+  },
+  {
+    "type": "p",
+    "content": "The labels at the leaves of a partition tree express whether the path from the\nroot of the tree to the leaf represents a successful partition ofn."
+  },
+  {
+    "type": "code",
+    "content": ">>> def partition_tree(n, m):\n        \"\"\"Return a partition tree of n using parts of up to m.\"\"\"\n        if n == 0:\n            return tree(True)\n        elif n < 0 or m == 0:\n            return tree(False)\n        else:\n            left = partition_tree(n-m, m)\n            right = partition_tree(n, m-1)\n            return tree(m, [left, right])\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> partition_tree(2, 2)\n[2, [True], [1, [1, [True], [False]], [False]]]\n"
+  },
+  {
+    "type": "p",
+    "content": "Printing the partitions from a partition tree is another tree-recursive process\nthat traverses the tree, constructing each partition as a list. Whenever\naTrueleaf is reached, the partition is printed."
+  },
+  {
+    "type": "code",
+    "content": ">>> def print_parts(tree, partition=[]):\n        if is_leaf(tree):\n            if label(tree):\n                print(' + '.join(partition))\n        else:\n            left, right = branches(tree)\n            m = str(label(tree))\n            print_parts(left, partition + [m])\n            print_parts(right, partition)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> print_parts(partition_tree(6, 4))\n4 + 2\n4 + 1 + 1\n3 + 3\n3 + 2 + 1\n3 + 1 + 1 + 1\n2 + 2 + 2\n2 + 2 + 1 + 1\n2 + 1 + 1 + 1 + 1\n1 + 1 + 1 + 1 + 1 + 1\n"
+  },
+  {
+    "type": "p",
+    "content": "Slicing can be used on the branches of a tree as well. For example, we may want\nto place a restriction on the number of branches in a tree. A binary tree is\neither a leaf or a sequence of at most two binary trees. A common tree\ntransformation calledbinarizationcomputes a binary tree from an original\ntree by grouping together adjacent branches."
+  },
+  {
+    "type": "code",
+    "content": ">>> def right_binarize(tree):\n        \"\"\"Construct a right-branching binary tree.\"\"\"\n        if is_leaf(tree):\n            return tree\n        if len(tree) > 2:\n            tree = [tree[0], tree[1:]]\n        return [right_binarize(b) for b in tree]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> right_binarize([1, 2, 3, 4, 5, 6, 7])\n[1, [2, [3, [4, [5, [6, 7]]]]]]\n"
+  },
+  {
+    "type": "h3",
+    "content": "2.3.7   Linked Lists"
+  },
+  {
+    "type": "p",
+    "content": "So far, we have used only native types to represent sequences. However, we can\nalso develop sequence representations that are not built into Python. A\ncommon representation of a sequence constructed from nested pairs is called alinked list. The environment diagram below illustrates the linked list\nrepresentation of a four-element sequence containing 1, 2, 3, and 4."
+  },
+  {
+    "type": "p",
+    "content": "A linked list is a pair containing the first element of the sequence (in this\ncase 1) and the rest of the sequence (in this case a representation of 2, 3,\n4).  The second element is also a linked list. The rest of the inner-most\nlinked list containing only 4 is'empty', a value that represents an empty\nlinked list."
+  },
+  {
+    "type": "p",
+    "content": "Linked lists have recursive structure: the rest of a linked list is a linked\nlist or'empty'. We can define an abstract data representation to validate,\nconstruct, and select the components of linked lists."
+  },
+  {
+    "type": "code",
+    "content": ">>> empty = 'empty'\n>>> def is_link(s):\n        \"\"\"s is a linked list if it is empty or a (first, rest) pair.\"\"\"\n        return s == empty or (len(s) == 2 and is_link(s[1]))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def link(first, rest):\n        \"\"\"Construct a linked list from its first element and the rest.\"\"\"\n        assert is_link(rest), \"rest must be a linked list.\"\n        return [first, rest]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def first(s):\n        \"\"\"Return the first element of a linked list s.\"\"\"\n        assert is_link(s), \"first only applies to linked lists.\"\n        assert s != empty, \"empty linked list has no first element.\"\n        return s[0]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def rest(s):\n        \"\"\"Return the rest of the elements of a linked list s.\"\"\"\n        assert is_link(s), \"rest only applies to linked lists.\"\n        assert s != empty, \"empty linked list has no rest.\"\n        return s[1]\n"
+  },
+  {
+    "type": "p",
+    "content": "Above,linkis a constructor andfirstandrestare selectors for\nan abstract data representation of linked lists. The behavior condition for a\nlinked list is that, like a pair, its constructor and selectors are inverse\nfunctions."
+  },
+  {
+    "type": "p",
+    "content": "We can use the constructor and selectors to manipulate linked lists."
+  },
+  {
+    "type": "code",
+    "content": ">>> four = link(1, link(2, link(3, link(4, empty))))\n>>> first(four)\n1\n>>> rest(four)\n[2, [3, [4, 'empty']]]\n"
+  },
+  {
+    "type": "p",
+    "content": "Our implementation of this kind of abstract data uses pairs that are\ntwo-elementlistvalues. It is worth noting that we were also able to\nimplement pairs using functions, and we can implement linked lists using any\npairs, therefore we could implement linked lists using functions alone."
+  },
+  {
+    "type": "p",
+    "content": "The linked list can store a sequence of values in order, but we have not yet\nshown that it satisfies the sequence abstraction.  Using the abstract data\nrepresentation we have defined, we can implement the two behaviors that\ncharacterize a sequence: length and element selection."
+  },
+  {
+    "type": "code",
+    "content": ">>> def len_link(s):\n        \"\"\"Return the length of linked list s.\"\"\"\n        length = 0\n        while s != empty:\n            s, length = rest(s), length + 1\n        return length\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def getitem_link(s, i):\n        \"\"\"Return the element at index i of linked list s.\"\"\"\n        while i > 0:\n            s, i = rest(s), i - 1\n        return first(s)\n"
+  },
+  {
+    "type": "p",
+    "content": "Now, we can manipulate a linked list as a sequence using these functions.\n(We cannot yet use the built-inlenfunction, element selection syntax, orforstatement, but we will soon.)"
+  },
+  {
+    "type": "code",
+    "content": ">>> len_link(four)\n4\n>>> getitem_link(four, 1)\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "The series of environment diagrams below illustrate the iterative process by\nwhichgetitem_linkfinds the element 2 at index 1 in a linked\nlist. Below, we have defined the linked listfourusing Python primitives to\nsimplify the diagrams. This implementation choice violates an abstraction\nbarrier, but allows us to inspect the computational process more easily for\nthis example."
+  },
+  {
+    "type": "p",
+    "content": "First, the functiongetitem_linkis called, creating a local frame."
+  },
+  {
+    "type": "p",
+    "content": "The expression in thewhileheader evaluates to true, which causes the\nassignment statement in thewhilesuite to be executed.  The functionrestreturns the sublist starting with 2."
+  },
+  {
+    "type": "p",
+    "content": "Next, the local nameswill be updated to refer to the sub-list that begins\nwith the second element of the original list.  Evaluating thewhileheader\nexpression now yields a false value, and so Python evaluates the expression in\nthe return statement on the final line ofgetitem_link."
+  },
+  {
+    "type": "p",
+    "content": "This final environment diagram shows the local frame for the call tofirst,\nwhich contains the namesbound to that same sub-list.  Thefirstfunction selects the value 2 and returns it, which will also be returned\nfromgetitem_link."
+  },
+  {
+    "type": "p",
+    "content": "This example demonstrates a common pattern of computation with linked lists,\nwhere each step in an iteration operates on an increasingly shorter suffix of\nthe original list. This incremental processing to find the length and elements\nof a linked list does take some time to compute. Python's built-in sequence\ntypes are implemented in a different way that does not have a large cost for\ncomputing the length of a sequence or retrieving its elements. The details of\nthat representation are beyond the scope of this text."
+  },
+  {
+    "type": "p",
+    "content": "Recursive manipulation.Bothlen_linkandgetitem_linkare\niterative. They peel away each layer of nested pair until the end of the list\n(inlen_link) or the desired element (ingetitem_link) is reached. We\ncan also implement length and element selection using recursion."
+  },
+  {
+    "type": "code",
+    "content": ">>> def len_link_recursive(s):\n        \"\"\"Return the length of a linked list s.\"\"\"\n        if s == empty:\n            return 0\n        return 1 + len_link_recursive(rest(s))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def getitem_link_recursive(s, i):\n        \"\"\"Return the element at index i of linked list s.\"\"\"\n        if i == 0:\n            return first(s)\n        return getitem_link_recursive(rest(s), i - 1)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> len_link_recursive(four)\n4\n>>> getitem_link_recursive(four, 1)\n2\n"
+  },
+  {
+    "type": "p",
+    "content": "These recursive implementations follow the chain of pairs until the end of the\nlist (inlen_link_recursive) or the desired element (ingetitem_link_recursive) is reached."
+  },
+  {
+    "type": "p",
+    "content": "Recursion is also useful for transforming and combining linked lists."
+  },
+  {
+    "type": "code",
+    "content": ">>> def extend_link(s, t):\n        \"\"\"Return a list with the elements of s followed by those of t.\"\"\"\n        assert is_link(s) and is_link(t)\n        if s == empty:\n            return t\n        else:\n            return link(first(s), extend_link(rest(s), t))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> extend_link(four, four)\n[1, [2, [3, [4, [1, [2, [3, [4, 'empty']]]]]]]]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def apply_to_all_link(f, s):\n        \"\"\"Apply f to each element of s.\"\"\"\n        assert is_link(s)\n        if s == empty:\n            return s\n        else:\n            return link(f(first(s)), apply_to_all_link(f, rest(s)))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> apply_to_all_link(lambda x: x*x, four)\n[1, [4, [9, [16, 'empty']]]]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def keep_if_link(f, s):\n        \"\"\"Return a list with elements of s for which f(e) is true.\"\"\"\n        assert is_link(s)\n        if s == empty:\n            return s\n        else:\n            kept = keep_if_link(f, rest(s))\n            if f(first(s)):\n                return link(first(s), kept)\n            else:\n                return kept\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> keep_if_link(lambda x: x%2 == 0, four)\n[2, [4, 'empty']]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def join_link(s, separator):\n        \"\"\"Return a string of all elements in s separated by separator.\"\"\"\n        if s == empty:\n            return \"\"\n        elif rest(s) == empty:\n            return str(first(s))\n        else:\n            return str(first(s)) + separator + join_link(rest(s), separator)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> join_link(four, \", \")\n'1, 2, 3, 4'\n"
+  },
+  {
+    "type": "p",
+    "content": "Recursive Construction.Linked lists are particularly useful when\nconstructing sequences incrementally, a situation that arises often in\nrecursive computations."
+  },
+  {
+    "type": "p",
+    "content": "Thecount_partitionsfunction from Chapter 1 counted the number of ways\nto partition an integernusing parts up to sizemvia a tree-recursive\nprocess. With sequences, we can also enumerate these partitions explicitly\nusing a similar process."
+  },
+  {
+    "type": "p",
+    "content": "We follow the same recursive analysis of the problem as we did while counting:\npartitioningnusing integers up tominvolves either"
+  },
+  {
+    "type": "p",
+    "content": "For base cases, we find that 0 has an empty partition, while partitioning a\nnegative integer or using parts smaller than 1 is impossible."
+  },
+  {
+    "type": "code",
+    "content": ">>> def partitions(n, m):\n        \"\"\"Return a linked list of partitions of n using parts of up to m.\n        Each partition is represented as a linked list.\n        \"\"\"\n        if n == 0:\n            return link(empty, empty) # A list containing the empty partition\n        elif n < 0 or m == 0:\n            return empty\n        else:\n            using_m = partitions(n-m, m)\n            with_m = apply_to_all_link(lambda s: link(m, s), using_m)\n            without_m = partitions(n, m-1)\n            return extend_link(with_m, without_m)\n"
+  },
+  {
+    "type": "p",
+    "content": "In the recursive case, we construct two sublists of partitions. The first usesm, and so we prependmto each element of the resultusing_mto\nformwith_m."
+  },
+  {
+    "type": "p",
+    "content": "The result ofpartitionsis highly nested: a linked list of linked lists,\nand each linked list is represented as nested pairs that arelistvalues.\nUsingjoin_linkwith appropriate separators, we can display the partitions\nin a human-readable manner."
+  },
+  {
+    "type": "code",
+    "content": ">>> def print_partitions(n, m):\n        lists = partitions(n, m)\n        strings = apply_to_all_link(lambda s: join_link(s, \" + \"), lists)\n        print(join_link(strings, \"\\n\"))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> print_partitions(6, 4)\n4 + 2\n4 + 1 + 1\n3 + 3\n3 + 2 + 1\n3 + 1 + 1 + 1\n2 + 2 + 2\n2 + 2 + 1 + 1\n2 + 1 + 1 + 1 + 1\n1 + 1 + 1 + 1 + 1 + 1\n"
+  },
+  {
+    "type": "p",
+    "content": "Continue:2.4 Mutable Data"
+  }
+]

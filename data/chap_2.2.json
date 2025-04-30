@@ -1,0 +1,254 @@
+[
+  {
+    "type": "h2",
+    "content": "2.2   Data Abstraction"
+  },
+  {
+    "type": "p",
+    "content": "As we consider the wide set of things in the world that we would like to\nrepresent in our programs, we find that most of them have compound structure.\nFor example, a geographic position has latitude and longitude coordinates.  To\nrepresent positions, we would like our programming language to have the\ncapacity to couple together a latitude and longitude to form a pair, acompound datavalue that our programs can manipulate as a single conceptual\nunit, but which also has two parts that can be considered individually."
+  },
+  {
+    "type": "p",
+    "content": "The use of compound data enables us to increase the modularity of our programs.\nIf we can manipulate geographic positions as whole values, then we can shield\nparts of our program that compute using positions from the details of how those\npositions are represented. The general technique of isolating the parts of a\nprogram that deal with how data are represented from the parts that deal with\nhow data are manipulated is a powerful design methodology calleddata\nabstraction. Data abstraction makes programs much easier to design, maintain,\nand modify."
+  },
+  {
+    "type": "p",
+    "content": "Data abstraction is similar in character to functional abstraction.  When we\ncreate a functional abstraction, the details of how a function is implemented\ncan be suppressed, and the particular function itself can be replaced by any\nother function with the same overall behavior.  In other words, we can make an\nabstraction that separates the way the function is used from the details of how\nthe function is implemented.  Analogously, data abstraction isolates how a\ncompound data value is used from the details of how it is constructed."
+  },
+  {
+    "type": "p",
+    "content": "The basic idea of data abstraction is to structure programs so that they\noperate on abstract data. That is, our programs should use data in such a way\nas to make as few assumptions about the data as possible. At the same time, a\nconcrete data representation is defined as an independent part of the program."
+  },
+  {
+    "type": "p",
+    "content": "These two parts of a program, the part that operates on abstract data and the\npart that defines a concrete representation, are connected by a small set of\nfunctions that implement abstract data in terms of the concrete representation.\nTo illustrate this technique, we will consider how to design a set of functions\nfor manipulating rational numbers."
+  },
+  {
+    "type": "h3",
+    "content": "2.2.1   Example: Rational Numbers"
+  },
+  {
+    "type": "p",
+    "content": "A rational number is a ratio of integers, and rational numbers constitute an\nimportant sub-class of real numbers.  A rational number such as1/3or17/29is typically written as:"
+  },
+  {
+    "type": "p",
+    "content": "where both the<numerator>and<denominator>are placeholders for\ninteger values.  Both parts are needed to exactly characterize the value of the\nrational number. Actually dividing integers produces afloatapproximation,\nlosing the exact precision of integers."
+  },
+  {
+    "type": "code",
+    "content": ">>> 1/3\n0.3333333333333333\n>>> 1/3 == 0.333333333333333300000  # Dividing integers yields an approximation\nTrue\n"
+  },
+  {
+    "type": "p",
+    "content": "However, we can create an exact representation for rational numbers by\ncombining together the numerator and denominator."
+  },
+  {
+    "type": "p",
+    "content": "We know from using functional abstractions that we can start programming\nproductively before we have an implementation of some parts of our program.\nLet us begin by assuming that we already have a way of constructing a rational\nnumber from a numerator and a denominator. We also assume that, given a\nrational number, we have a way of selecting its numerator and its denominator\ncomponent. Let us further assume that the constructor and selectors are\navailable as the following three functions:"
+  },
+  {
+    "type": "p",
+    "content": "We are using here a powerful strategy for designing programs:wishful\nthinking. We haven't yet said how a rational number is represented, or how the\nfunctionsnumer,denom, andrationalshould be implemented. Even\nso, if we did define these three functions, we could then add, multiply, print,\nand test equality of rational numbers:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def add_rationals(x, y):\n        nx, dx = numer(x), denom(x)\n        ny, dy = numer(y), denom(y)\n        return rational(nx * dy + ny * dx, dx * dy)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def mul_rationals(x, y):\n        return rational(numer(x) * numer(y), denom(x) * denom(y))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def print_rational(x):\n        print(numer(x), '/', denom(x))\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def rationals_are_equal(x, y):\n        return numer(x) * denom(y) == numer(y) * denom(x)\n"
+  },
+  {
+    "type": "p",
+    "content": "Now we have the operations on rational numbers defined in terms of the selector\nfunctionsnumeranddenom, and the constructor functionrational,\nbut we haven't yet defined these functions. What we need is some way to glue\ntogether a numerator and a denominator into a compound value."
+  },
+  {
+    "type": "h3",
+    "content": "2.2.2   Pairs"
+  },
+  {
+    "type": "p",
+    "content": "To enable us to implement the concrete level of our data abstraction, Python\nprovides a compound structure called alist, which can be constructed by\nplacing expressions within square brackets separated by commas. Such an\nexpression is called a list literal."
+  },
+  {
+    "type": "code",
+    "content": ">>> [10, 20]\n[10, 20]\n"
+  },
+  {
+    "type": "p",
+    "content": "The elements of a list can be accessed in two ways.  The first way is via our\nfamiliar method of multiple assignment, which unpacks a list into its elements\nand binds each element to a different name."
+  },
+  {
+    "type": "code",
+    "content": ">>> pair = [10, 20]\n>>> pair\n[10, 20]\n>>> x, y = pair\n>>> x\n10\n>>> y\n20\n"
+  },
+  {
+    "type": "p",
+    "content": "A second method for accessing the elements in a list is by the element\nselection operator, also expressed using square brackets. Unlike a list\nliteral, a square-brackets expression directly following another expression\ndoes not evaluate to alistvalue, but instead selects an element from the\nvalue of the preceding expression."
+  },
+  {
+    "type": "code",
+    "content": ">>> pair[0]\n10\n>>> pair[1]\n20\n"
+  },
+  {
+    "type": "p",
+    "content": "Lists in Python (and sequences in most other programming languages) are\n0-indexed, meaning that the index 0 selects the first element, index 1\nselects the second, and so on.  One intuition that supports this indexing\nconvention is that the index represents how far an element is offset from the\nbeginning of the list."
+  },
+  {
+    "type": "p",
+    "content": "The equivalent function for the element selection operator is calledgetitem, and it also uses 0-indexed positions to select elements from a\nlist."
+  },
+  {
+    "type": "code",
+    "content": ">>> from operator import getitem\n>>> getitem(pair, 0)\n10\n>>> getitem(pair, 1)\n20\n"
+  },
+  {
+    "type": "p",
+    "content": "Two-element lists are not the only method of representing pairs in Python.\nAny way of bundling two values together into one can be considered a pair.\nLists are a common method to do so. Lists can also contain more than two\nelements, as we will explore later in the chapter."
+  },
+  {
+    "type": "p",
+    "content": "Representing Rational Numbers.We can now represent a rational number as a\npair of two integers: a numerator and a denominator."
+  },
+  {
+    "type": "code",
+    "content": ">>> def rational(n, d):\n        return [n, d]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def numer(x):\n        return x[0]\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def denom(x):\n        return x[1]\n"
+  },
+  {
+    "type": "p",
+    "content": "Together with the arithmetic operations we defined earlier, we can manipulate\nrational numbers with the functions we have defined."
+  },
+  {
+    "type": "code",
+    "content": ">>> half = rational(1, 2)\n>>> print_rational(half)\n1 / 2\n>>> third = rational(1, 3)\n>>> print_rational(mul_rationals(half, third))\n1 / 6\n>>> print_rational(add_rationals(third, third))\n6 / 9\n"
+  },
+  {
+    "type": "p",
+    "content": "As the example above shows, our rational number implementation does not reduce\nrational numbers to lowest terms. We can remedy this flaw by changing the\nimplementation ofrational. If we have a function for computing the\ngreatest common denominator of two integers, we can use it to reduce the\nnumerator and the denominator to lowest terms before constructing the pair.  As\nwith many useful tools, such a function already exists in the Python Library."
+  },
+  {
+    "type": "code",
+    "content": ">>> from fractions import gcd\n>>> def rational(n, d):\n        g = gcd(n, d)\n        return (n//g, d//g)\n"
+  },
+  {
+    "type": "p",
+    "content": "The floor division operator,//, expresses integer division, which rounds\ndown the fractional part of the result of division.  Since we know thatgdivides bothnanddevenly, integer division is exact in this case.\nThis revisedrationalimplementation ensures that rationals are expressed\nin lowest terms."
+  },
+  {
+    "type": "code",
+    "content": ">>> print_rational(add_rationals(third, third))\n2 / 3\n"
+  },
+  {
+    "type": "p",
+    "content": "This improvement was accomplished by changing the constructor without changing\nany of the functions that implement the actual arithmetic operations."
+  },
+  {
+    "type": "h3",
+    "content": "2.2.3   Abstraction Barriers"
+  },
+  {
+    "type": "p",
+    "content": "Before continuing with more examples of compound data and data abstraction, let\nus consider some of the issues raised by the rational number example. We\ndefined operations in terms of a constructorrationaland selectorsnumeranddenom. In general, the underlying idea of data abstraction is\nto identify a basic set of operations in terms of which all manipulations of\nvalues of some kind will be expressed, and then to use only those operations in\nmanipulating the data. By restricting the use of operations in this way, it is\nmuch easier to change the representation of abstract data without changing the\nbehavior of a program."
+  },
+  {
+    "type": "p",
+    "content": "For rational numbers, different parts of the program manipulate rational\nnumbers using different operations, as described in this table."
+  },
+  {
+    "type": "p",
+    "content": "In each layer above, the functions in the final column enforce an abstraction\nbarrier. These functions are called by a higher level and implemented using a\nlower level of abstraction."
+  },
+  {
+    "type": "p",
+    "content": "An abstraction barrier violation occurs whenever a part of the program that\ncan use a higher level function instead uses a function in a lower level. For\nexample, a function that computes the square of a rational number is best\nimplemented in terms ofmul_rational, which does not assume anything about\nthe implementation of a rational number."
+  },
+  {
+    "type": "code",
+    "content": ">>> def square_rational(x):\n        return mul_rational(x, x)\n"
+  },
+  {
+    "type": "p",
+    "content": "Referring directly to numerators and denominators would violate one abstraction\nbarrier."
+  },
+  {
+    "type": "code",
+    "content": ">>> def square_rational_violating_once(x):\n        return rational(numer(x) * numer(x), denom(x) * denom(x))\n"
+  },
+  {
+    "type": "p",
+    "content": "Assuming that rationals are represented as two-element lists would violate two\nabstraction barriers."
+  },
+  {
+    "type": "code",
+    "content": ">>> def square_rational_violating_twice(x):\n        return [x[0] * x[0], x[1] * x[1]]\n"
+  },
+  {
+    "type": "p",
+    "content": "Abstraction barriers make programs easier to maintain and to modify. The fewer\nfunctions that depend on a particular representation, the fewer changes are\nrequired when one wants to change that representation. All of these\nimplementations ofsquare_rationalhave the correct behavior, but only the\nfirst is robust to future changes. Thesquare_rationalfunction would not\nrequire updating even if we altered the representation of rational numbers. By\ncontrast,square_rational_violating_oncewould need to be changed whenever\nthe selector or constructor signatures changed, andsquare_rational_violating_twicewould require updating whenever the\nimplementation of rational numbers changed."
+  },
+  {
+    "type": "h3",
+    "content": "2.2.4   The Properties of Data"
+  },
+  {
+    "type": "p",
+    "content": "Abstraction barriers shape the way in which we think about data. A valid\nrepresentation of a rational number is not restricted to any particular\nimplementation (such as a two-element list); it is a value returned byrationalthat can be passed tonumer, anddenom.\nIn addition, the appropriate relationship must hold among the constructor and\nselectors. That is, if we construct a rational numberxfrom integersnandd, then it should be the case thatnumer(x)/denom(x)is equal ton/d."
+  },
+  {
+    "type": "p",
+    "content": "In general, we can express abstract data using a collection of selectors and\nconstructors, together with some behavior conditions.  As long as the behavior\nconditions are met (such as the division property above), the selectors and\nconstructors constitute a valid representation of a kind of data. The\nimplementation details below an abstraction barrier may change, but if the\nbehavior does not, then the data abstraction remains valid, and any program\nwritten using this data abstraction will remain correct."
+  },
+  {
+    "type": "p",
+    "content": "This point of view can be applied broadly, including to the pair values\nthat we used to implement rational numbers. We never actually said much about\nwhat a pair was, only that the language supplied the means to create and\nmanipulate lists with two elements. The behavior we require to implement\na pair is that it glues two values together. Stated as a behavior condition,"
+  },
+  {
+    "type": "p",
+    "content": "We don't actually need thelisttype to create pairs. Instead, we can\nimplement two functionspairandselectthat fulfill this description\njust as well as a two-element list."
+  },
+  {
+    "type": "code",
+    "content": ">>> def pair(x, y):\n        \"\"\"Return a function that represents a pair.\"\"\"\n        def get(index):\n            if index == 0:\n                return x\n            elif index == 1:\n                return y\n        return get\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def select(p, i):\n        \"\"\"Return the element at index i of pair p.\"\"\"\n        return p(i)\n"
+  },
+  {
+    "type": "p",
+    "content": "With this implementation, we can create and manipulate pairs."
+  },
+  {
+    "type": "code",
+    "content": ">>> p = pair(20, 14)\n>>> select(p, 0)\n20\n>>> select(p, 1)\n14\n"
+  },
+  {
+    "type": "p",
+    "content": "This use of higher-order functions corresponds to nothing like our intuitive\nnotion of what data should be. Nevertheless, these functions suffice to\nrepresent pairs in our programs. Functions are sufficient to represent compound\ndata."
+  },
+  {
+    "type": "p",
+    "content": "The point of exhibiting the functional representation of a pair is not that\nPython actually works this way (lists are implemented more directly, for\nefficiency reasons) but that it could work this way. The functional\nrepresentation, although obscure, is a perfectly adequate way to represent\npairs, since it fulfills the only conditions that pairs need to fulfill. The\npractice of data abstraction allows us to switch among representations easily."
+  },
+  {
+    "type": "p",
+    "content": "Continue:2.3 Sequences"
+  }
+]

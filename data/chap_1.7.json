@@ -1,0 +1,246 @@
+[
+  {
+    "type": "h2",
+    "content": "1.7   Recursive Functions"
+  },
+  {
+    "type": "p",
+    "content": "A function is calledrecursiveif the body of the function calls the function\nitself, either directly or indirectly.  That is, the process of executing the\nbody of a recursive function may in turn require applying that function again.\nRecursive functions do not use any special syntax in Python, but they do require\nsome effort to understand and create."
+  },
+  {
+    "type": "p",
+    "content": "We'll begin with an example problem: write a function that sums the digits of a\nnatural number. When designing recursive functions, we look for ways in which a\nproblem can be broken down into simpler problems.  In this case, the operators%and//can be used to separate a number into two parts: its last digit\nand all but its last digit."
+  },
+  {
+    "type": "code",
+    "content": ">>> 18117 % 10\n7\n>>> 18117 // 10\n1811\n"
+  },
+  {
+    "type": "p",
+    "content": "The sum of the digits of 18117 is1+8+1+1+7 = 18.  Just as we can separate\nthe number, we can separate this sum into the last digit, 7, and the sum of all\nbut the last digit,1+8+1+1 = 11.  This separation gives us an algorithm: to\nsum the digits of a numbern, add its last digitn % 10to the sum of\nthe digits ofn // 10.  There's one special case: if a number has only one\ndigit, then the sum of its digits is itself.  This algorithm can be implemented\nas a recursive function."
+  },
+  {
+    "type": "code",
+    "content": ">>> def sum_digits(n):\n        \"\"\"Return the sum of the digits of positive integer n.\"\"\"\n        if n < 10:\n            return n\n        else:\n            all_but_last, last = n // 10, n % 10\n            return sum_digits(all_but_last) + last\n"
+  },
+  {
+    "type": "p",
+    "content": "This definition ofsum_digitsis both complete and correct, even though thesum_digitsfunction is called within its own body. The problem of summing\nthe digits of a number is broken down into two steps: summing all but the last\ndigit, then adding the last digit.  Both of these steps are simpler than the\noriginal problem.  The function is recursive because the first step is the same\nkind of problem as the original problem.  That is,sum_digitsis exactly the\nfunction we need in order to implementsum_digits."
+  },
+  {
+    "type": "code",
+    "content": ">>> sum_digits(9)\n9\n>>> sum_digits(18117)\n18\n>>> sum_digits(9437184)\n36\n>>> sum_digits(11408855402054064613470328848384)\n126\n"
+  },
+  {
+    "type": "p",
+    "content": "We can understand precisely how this recursive function applies successfully\nusing our environment model of computation. No new rules are required."
+  },
+  {
+    "type": "p",
+    "content": "When thedefstatement is executed, the namesum_digitsis bound to a\nnew function, but the body of that function is not yet executed.  Therefore, the\ncircular nature ofsum_digitsis not a problem yet.  Then,sum_digitsis\ncalled on 738:"
+  },
+  {
+    "type": "p",
+    "content": "This recursive function applies correctly, despite its circular character,\nbecause it is applied twice, but with a different argument each time.  Moreover,\nthe second application was a simpler instance of the digit summing problem than\nthe first.  Generate the environment diagram for the callsum_digits(18117)to see that each successive call tosum_digitstakes a smaller argument than\nthe last, until eventually a single-digit input is reached."
+  },
+  {
+    "type": "p",
+    "content": "This example also illustrates how functions with simple bodies can evolve\ncomplex computational processes by using recursion."
+  },
+  {
+    "type": "h3",
+    "content": "1.7.1   The Anatomy of Recursive Functions"
+  },
+  {
+    "type": "p",
+    "content": "A common pattern can be found in the body of many recursive functions.  The body\nbegins with abase case, a conditional statement that defines the behavior of\nthe function for the inputs that are simplest to process.  In the case ofsum_digits, the base case is any single-digit argument, and we simply return\nthat argument. Some recursive functions will have multiple base cases."
+  },
+  {
+    "type": "p",
+    "content": "The base cases are then followed by one or morerecursive calls.  Recursive\ncalls always have a certain character: they simplify the original problem.\nRecursive functions express computation by simplifying problems incrementally.\nFor example, summing the digits of 7 is simpler than summing the digits of 73,\nwhich in turn is simpler than summing the digits of 738.  For each subsequent\ncall, there is less work left to be done."
+  },
+  {
+    "type": "p",
+    "content": "Recursive functions often solve problems in a different way than the iterative\napproaches that we have used previously. Consider a functionfactto computenfactorial, where for examplefact(4)computes$4! = 4 \\cdot\n3 \\cdot 2 \\cdot 1 = 24$."
+  },
+  {
+    "type": "p",
+    "content": "A natural implementation using awhilestatement accumulates the total by\nmultiplying together each positive integer up ton."
+  },
+  {
+    "type": "code",
+    "content": ">>> def fact_iter(n):\n        total, k = 1, 1\n        while k <= n:\n            total, k = total * k, k + 1\n        return total\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> fact_iter(4)\n24\n"
+  },
+  {
+    "type": "p",
+    "content": "On the other hand, a recursive implementation of factorial can expressfact(n)in terms offact(n-1), a simpler problem.  The base case of the\nrecursion is the simplest form of the problem:fact(1)is 1."
+  },
+  {
+    "type": "p",
+    "content": "These two factorial functions differ conceptually.  The iterative function\nconstructs the result from the base case of 1 to the final total by\nsuccessively multiplying in each term.  The recursive function, on the other\nhand, constructs the result directly from the final term,n,  and the\nresult of the simpler problem,fact(n-1)."
+  },
+  {
+    "type": "p",
+    "content": "As the recursion \"unwinds\" through successive applications of thefactfunction to simpler and simpler problem instances, the result is eventually\nbuilt starting from the base case.  The recursion ends by passing the argument\n1 tofact; the result of each call depends on the next until the base\ncase is reached."
+  },
+  {
+    "type": "p",
+    "content": "The correctness of this recursive function is easy to verify from the standard\ndefinition of the mathematical function for factorial:"
+  },
+  {
+    "type": "p",
+    "content": "While we can unwind the recursion using our model of computation, it is often\nclearer to think about recursive calls as functional abstractions.  That is, we\nshould not care about howfact(n-1)is implemented in the body offact;\nwe should simply trust that it computes the factorial ofn-1.  Treating a\nrecursive call as a functional abstraction has been called arecursive leap\nof faith. We define a function in terms of itself, but simply trust that the\nsimpler cases will work correctly when verifying the correctness of the\nfunction. In this example, we trust thatfact(n-1)will correctly compute(n-1)!; we must only check thatn!is computed correctly if this\nassumption holds. In this way, verifying the correctness of a recursive function\nis a form of proof by induction."
+  },
+  {
+    "type": "p",
+    "content": "The functionsfact_iterandfactalso differ because the former must\nintroduce two additional names,totalandk, that are not required in\nthe recursive implementation.  In general, iterative functions must maintain\nsome local state that changes throughout the course of computation.  At any\npoint in the iteration, that state characterizes the result of completed work\nand the amount of work remaining.  For example, whenkis 3 and total\nis 2, there are still two terms remaining to be processed, 3 and 4.\nOn the other hand,factis characterized by its single argumentn. The\nstate of the computation is entirely contained within the structure of the\nenvironment, which has return values that take the role oftotal, and bindsnto different values in different frames rather than explicitly trackingk."
+  },
+  {
+    "type": "p",
+    "content": "Recursive functions leverage the rules of evaluating call expressions to bind\nnames to values, often avoiding the nuisance of correctly assigning local names\nduring iteration. For this reason, recursive functions can be easier to define\ncorrectly. However, learning to recognize the computational processes evolved by\nrecursive functions certainly requires practice."
+  },
+  {
+    "type": "h3",
+    "content": "1.7.2   Mutual Recursion"
+  },
+  {
+    "type": "p",
+    "content": "When a recursive procedure is divided among two functions that call each other,\nthe functions are said to bemutually recursive. As an example, consider the\nfollowing definition of even and odd for non-negative integers:"
+  },
+  {
+    "type": "p",
+    "content": "Using this definition, we can implement mutually recursive functions to\ndetermine whether a number is even or odd:"
+  },
+  {
+    "type": "p",
+    "content": "Mutually recursive functions can be turned into a single recursive function\nby breaking the abstraction boundary between the two functions. In this\nexample, the body ofis_oddcan be incorporated into that ofis_even,\nmaking sure to replacenwithn-1in the body ofis_oddto reflect\nthe argument passed into it:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def is_even(n):\n        if n == 0:\n            return True\n        else:\n            if (n-1) == 0:\n                return False\n            else:\n                return is_even((n-1)-1)\n"
+  },
+  {
+    "type": "p",
+    "content": "As such, mutual recursion is no more mysterious or powerful than simple\nrecursion, and it provides a mechanism for maintaining abstraction within a\ncomplicated recursive program."
+  },
+  {
+    "type": "h3",
+    "content": "1.7.3   Printing in Recursive Functions"
+  },
+  {
+    "type": "p",
+    "content": "The computational process evolved by a recursive function can often be\nvisualized using calls toprint.  As an example, we will implement a\nfunctioncascadethat prints all prefixes of a number from largest to\nsmallest to largest."
+  },
+  {
+    "type": "code",
+    "content": ">>> def cascade(n):\n        \"\"\"Print a cascade of prefixes of n.\"\"\"\n        if n < 10:\n            print(n)\n        else:\n            print(n)\n            cascade(n//10)\n            print(n)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> cascade(2013)\n2013\n201\n20\n2\n20\n201\n2013\n"
+  },
+  {
+    "type": "p",
+    "content": "In this recursive function, the base case is a single-digit number, which is\nprinted.  Otherwise, a recursive call is placed between two calls toprint."
+  },
+  {
+    "type": "p",
+    "content": "It is not a rigid requirement that base cases be expressed before recursive\ncalls.  In fact, this function can be expressed more compactly by observing thatprint(n)is repeated in both clauses of the conditional statement, and\ntherefore can precede it."
+  },
+  {
+    "type": "code",
+    "content": ">>> def cascade(n):\n        \"\"\"Print a cascade of prefixes of n.\"\"\"\n        print(n)\n        if n >= 10:\n            cascade(n//10)\n            print(n)\n"
+  },
+  {
+    "type": "p",
+    "content": "As another example of mutual recursion, consider a two-player game in which\nthere areninitial pebbles on a table. The players take turns, removing\neither one or two pebbles from the table, and the player who removes the\nfinal pebble wins. Suppose that Alice and Bob play this game, each using a\nsimple strategy:"
+  },
+  {
+    "type": "p",
+    "content": "Givenninitial pebbles and Alice starting, who wins the game?"
+  },
+  {
+    "type": "p",
+    "content": "A natural decomposition of this problem is to encapsulate each strategy in its\nown function. This allows us to modify one strategy without affecting the other,\nmaintaining the abstraction barrier between the two. In order to incorporate the\nturn-by-turn nature of the game, these two functions call each other at the end\nof each turn."
+  },
+  {
+    "type": "code",
+    "content": ">>> def play_alice(n):\n        if n == 0:\n            print(\"Bob wins!\")\n        else:\n            play_bob(n-1)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> def play_bob(n):\n        if n == 0:\n            print(\"Alice wins!\")\n        elif is_even(n):\n            play_alice(n-2)\n        else:\n            play_alice(n-1)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> play_alice(20)\nBob wins!\n"
+  },
+  {
+    "type": "p",
+    "content": "Inplay_bob, we see that multiple recursive calls may appear in the body of\na function.  However, in this example, each call toplay_bobcallsplay_aliceat most once. In the next section, we consider what happens when\na single function call makes multiple direct recursive calls."
+  },
+  {
+    "type": "h3",
+    "content": "1.7.4   Tree Recursion"
+  },
+  {
+    "type": "p",
+    "content": "Another common pattern of computation is called tree recursion, in which a\nfunction calls itself more than once. As an example, consider computing the\nsequence of Fibonacci numbers, in which each number is the sum of the preceding\ntwo."
+  },
+  {
+    "type": "p",
+    "content": "This recursive definition is tremendously appealing relative to our previous\nattempts: it exactly mirrors the familiar definition of Fibonacci numbers.\nA function with multiple recursive calls is said to betree recursivebecause\neach call branches into multiple smaller calls, each of which branches into\nyet smaller calls, just as the branches of a tree become smaller but more\nnumerous as they extend from the trunk."
+  },
+  {
+    "type": "p",
+    "content": "We were already able to define a function to compute Fibonacci numbers without\ntree recursion. In fact, our previous attempts were more efficient, a topic\ndiscussed later in the text. Next, we consider a problem for which the tree\nrecursive solution is substantially simpler than any iterative alternative."
+  },
+  {
+    "type": "h3",
+    "content": "1.7.5   Example: Partitions"
+  },
+  {
+    "type": "p",
+    "content": "The number of partitions of a positive integern, using parts up to sizem, is the number of ways in whichncan be expressed as the sum of\npositive integer parts up tomin increasing order.  For example, the\nnumber of partitions of 6 using parts up to 4 is 9."
+  },
+  {
+    "type": "p",
+    "content": "We will define a functioncount_partitions(n, m)that returns the number of\ndifferent partitions ofnusing parts up tom.  This function has a\nsimple solution as a tree-recursive function, based on the following\nobservation:"
+  },
+  {
+    "type": "p",
+    "content": "The number of ways to partitionnusing integers up tomequals"
+  },
+  {
+    "type": "p",
+    "content": "To see why this is true, observe that all the ways of partitioningncan be\ndivided into two groups: those that include at least onemand those that do\nnot.  Moreover, each partition in the first group is a partition ofn-m,\nfollowed bymadded at the end. In the example above, the first two\npartitions contain 4, and the rest do not."
+  },
+  {
+    "type": "p",
+    "content": "Therefore, we can recursively reduce the problem of partitioningnusing\nintegers up tominto two simpler problems: (1) partition a smaller numbern-m, and (2) partition with smaller components up tom-1."
+  },
+  {
+    "type": "p",
+    "content": "To complete the implementation, we need to specify the following base cases:"
+  },
+  {
+    "type": "code",
+    "content": ">>> def count_partitions(n, m):\n        \"\"\"Count the ways to partition n using parts up to m.\"\"\"\n        if n == 0:\n            return 1\n        elif n < 0:\n            return 0\n        elif m == 0:\n            return 0\n        else:\n            return count_partitions(n-m, m) + count_partitions(n, m-1)\n"
+  },
+  {
+    "type": "code",
+    "content": ">>> count_partitions(6, 4)\n9\n>>> count_partitions(5, 5)\n7\n>>> count_partitions(10, 10)\n42\n>>> count_partitions(15, 15)\n176\n>>> count_partitions(20, 20)\n627\n"
+  },
+  {
+    "type": "p",
+    "content": "We can think of a tree-recursive function as exploring different possibilities.\nIn this case, we explore the possibility that we use a part of sizemand\nthe possibility that we do not.  The first and second recursive calls correspond\nto these possibilities."
+  },
+  {
+    "type": "p",
+    "content": "Implementing this function without recursion would be substantially more\ninvolved. Interested readers are encouraged to try."
+  }
+]
