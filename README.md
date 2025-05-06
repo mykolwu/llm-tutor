@@ -24,7 +24,11 @@ npm install
 ```
 
 ### 4. Run
-
+Launch the proxy in /proxy first
+```shell
+uvicorn proxy:app --port 9999
+```
+Launch the project 
 ```shell
 npm run dev
 ```

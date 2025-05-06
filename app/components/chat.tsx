@@ -77,7 +77,7 @@ const Chat = ({
   // create a new threadID when chat component created
   useEffect(() => {
     const createThread = async () => {
-      const res = await fetch(`/api/assistants/threads`, {
+      const res = await fetch(`http://localhost:9999/api/assistants/threads`, {
         method: "POST",
       });
       const data = await res.json();
@@ -88,7 +88,7 @@ const Chat = ({
 
   const sendMessage = async (text) => {
     const response = await fetch(
-      `/api/assistants/threads/${threadId}/messages`,
+      `http://localhost:9999/api/assistants/threads/messages`,
       {
         method: "POST",
         body: JSON.stringify({
