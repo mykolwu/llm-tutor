@@ -1,25 +1,27 @@
-import { assistantAId, assistantBId } from "@/app/assistant-config";
+// import { assistantAId, assistantBId } from "@/app/assistant-config";
 import { openai } from "@/app/openai";
 
 export const runtime = "nodejs";
 
 // Send a new message to a thread
 export async function POST(request, { params: { threadId } }) {
-  const { content } = await request.json();
+  const { user_content,developer_content, assistantId } = await request.json();
 
   await openai.beta.threads.messages.create(threadId, {
     role: "user",
-    content: content,
+    content: user_content,
   });
 
+
   // Call Assistant A (non-stream) to get a complete first-pass
-  await openai.beta.threads.runs.createAndPoll(threadId, {
-    assistant_id: assistantAId,
-  });
+  // await openai.beta.threads.runs.createAndPoll(threadId, {
+  //   assistant_id: assistantAId,
+  // });
 
   // Now stream Assistant B, which sees both messages in the thread
   const streamB = openai.beta.threads.runs.stream(threadId, {
-    assistant_id: assistantBId,
+    assistant_id: assistantId,
+    instructions: developer_content,
   });
 
   // Pipe B’s streaming response straight back to the client
